@@ -1,0 +1,8 @@
+###
+GET http://localhost:4000/ReporteHorizontal
+
+###
+GET http://localhost:4000/Txt
+
+###
+POST http://localhost:4000/procesar

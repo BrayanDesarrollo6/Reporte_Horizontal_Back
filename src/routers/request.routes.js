@@ -19,6 +19,6 @@ router.get('/procesarTXTSS', requestController.ReporteTxtResponseDocument)
 router.post('/certificadoAportes', ApiAportesController.certificadoAportes)
 router.post('/consultaIndividual', ApiAportesController.consultaIndividual)
 router.post('/validacionCargue', ApiAportesController.Validacion_Cargue)
-router.post('/validar', ApiAportesController.Validacion_Cargue)
+router.post('/validar', ApiAportesController.validar)
 // router.post('/consultaMasiva', ApiAportesController.certificadoAportes)
 module.exports = router;

@@ -17,15 +17,18 @@ import sys
 # Dataframe final
 # return render(request, "Resultado.html")
 
-def procesarTXTSS():
+def procesarTXTSS(NombreTemporal,Anio,Mes,Grupo):
     
-    NombreTemporal = sys.argv[1]
     NombreTemporal_ = NombreTemporal.replace(" ","%20")
-    Anio = sys.argv[2]
-    Mes = sys.argv[3]
+    
+    Grupo = Grupo.replace(", ", ",")
+    Grupo = Grupo.replace(" ", "%20")
+    Grupo = '[' + Grupo + ']'
+    
     TXT_Final = pd.DataFrame()
+    
     # URL DEL XLS DE SS
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=" + NombreTemporal_ + "&PENSION_ANO=" + Anio + "&PENSION_MES=" + Mes
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=" + NombreTemporal_ + "&PENSION_ANO=" + Anio + "&PENSION_MES=" + Mes + "&agrupacion_de_empresa_seg_soc=" + Grupo
     # URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=HQ5%20S.A.S&PENSION_ANO=2022&PENSION_MES=10"
     #CNVERTIR XLS EN DATAFRAME
     df = pd.read_excel(URL)
@@ -122,7 +125,7 @@ def procesarTXTSS():
 
         ##Para exportar en txt
         NombreTXT_ = "TXT-" + NombreTemporal_ + "-" + Anio + "-" + Mes 
-        file_name = open("./src/database/"+NombreTXT_ + ".txt", "w+")
+        file_name = open("./src/database/"+NombreTXT_ + ".txt", "w+", encoding="ANSI")
         Texto_ = ""
         for fila in TXT_Final["TXT"]:
             Texto_ += (str(fila)+"\n")
@@ -137,4 +140,36 @@ def procesarTXTSS():
 
         # response['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(NombreTXT_)
         # return response
-procesarTXTSS()
+#procesarTXTSS()
+
+# TRAER GRUPOS DE SEGURIDAD SOCIAL ---------------------------------------------------------------------
+def procesargrupostxt(NombreTemporal_,Anio,Mes):
+    
+    # URL DEL XLS DE SS
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=" + NombreTemporal_ + "&PENSION_ANO=" + Anio + "&PENSION_MES=" + Mes
+    # URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=HQ5%20S.A.S&PENSION_ANO=2022&PENSION_MES=10"
+    #CONVERTIR XLS EN DATAFRAME
+    df = pd.read_excel(URL)
+    df1 = pd.DataFrame(df)
+    
+    if(df1.empty):
+        print("No existe registro")
+    else:
+        List_Groups = df1['Agrupación de empresa'].unique().tolist()
+        print(List_Groups)
+    
+# Controlar las acciones del script
+def controlador():
+    NombreTemporal = sys.argv[1]
+    NombreTemporal_ = NombreTemporal.replace(" ","%20")
+    Anio = sys.argv[2]
+    Mes = sys.argv[3]
+    Grupo = sys.argv[4]
+    
+    if(Grupo == "Search_group"):
+        procesargrupostxt(NombreTemporal_,Anio,Mes)
+    else:
+        procesarTXTSS(NombreTemporal,Anio,Mes,Grupo)
+        
+    
+controlador()

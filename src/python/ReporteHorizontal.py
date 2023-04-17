@@ -29,11 +29,90 @@ def replacement(name_company):
     return name_company
 
 # ------------------------------------------------------------------------------------------
+# Función secundaria 
+def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal):
+    # Fila agregar
+    FilaAgregar = {}
+    ##Informacion general inicial
+    FilaAgregar["Estado Nomina"] = ContratoPos.iloc[0]['Estado Nomina']
+    FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
+    FilaAgregar["Empresa"] = ContratoPos.iloc[0]['Empresa']
+    FilaAgregar["ID Periodo"] = ContratoPos.iloc[0]['ID Periodo']
+    FilaAgregar["Tipo de Perido"] = ContratoPos.iloc[0]['Tipo de Perido']
+    FilaAgregar["Id Proceso"] = ContratoPos.iloc[0]['Id Proceso']
+    FilaAgregar["Mes"] = ContratoPos.iloc[0]['Mes']
+    FilaAgregar["Numero de Contrato"] = ContratoPos.iloc[0]['Numero de Contrato']
+    FilaAgregar["Nombres y Apellidos"] = ContratoPos.iloc[0]['Nombres y Apellidos']
+    FilaAgregar["Numero de Identificación"] = ContratoPos.iloc[0]['Numero de Identificación']
+    FilaAgregar["Centro de Costo"] = ContratoPos.iloc[0]['Centro de Costo']   
+    if(ContratoPos.iloc[0]['Dependencia']):
+        FilaAgregar["Dependencia"] = ContratoPos.iloc[0]['Dependencia']
+    if(ContratoPos.iloc[0]['Proceso']):
+        FilaAgregar["Proceso"] = ContratoPos.iloc[0]['Proceso']
+    FilaAgregar["Fecha Ingreso"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Ingreso']).date()
+    FilaAgregar["Fecha Retiro"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Retiro']).date()
+    FilaAgregar["Cargo"] = ContratoPos.iloc[0]['Cargo']
+    FilaAgregar["Salario Base"] = ContratoPos.iloc[0]['Salario Base']
+    SumatoriaNetoDev = 0
+    SumatoriaNetoDed = 0
+    #Ciclo para tomar informacion de los conceptos
+    for elemento in ConceptosDev:
+        de = ContratoPos["Concepto"] == str(elemento)
+        Conce= ContratoPos[de]
+        Unidades = 0
+        Neto = 0
+        if (Conce.empty == False):
+            Unidades = Conce["Horas"].sum()
+            Neto = Conce["Neto"].sum()
+            SumatoriaNetoDev += Neto
+        if (elemento + " / Neto" in FilaAgregar):
+            FilaAgregar[elemento + " / Unidades"] += Unidades
+            FilaAgregar[elemento + " / Neto"] += Neto 
+        else:
+            FilaAgregar[elemento + " / Unidades"] = Unidades
+            FilaAgregar[elemento + " / Neto"] = Neto 
+    FilaAgregar["Total Devengo"] = SumatoriaNetoDev
+    for elemento in ConceptosDed:
+        de = ContratoPos["Concepto"] == str(elemento)
+        Conce= ContratoPos[de]
+        Unidades = 0
+        Neto = 0
+        if (Conce.empty == False):
+            Unidades = Conce["Horas"].sum()
+            Neto = Conce["Neto"].sum()
+            SumatoriaNetoDed += Neto
+        if (elemento + " / Neto" in FilaAgregar):
+            FilaAgregar[elemento + " / Unidades"] += Unidades
+            FilaAgregar[elemento + " / Neto"] += Neto 
+        else:
+            FilaAgregar[elemento + " / Unidades"] = Unidades
+            FilaAgregar[elemento + " / Neto"] = Neto 
+    FilaAgregar["Total Deduccion"] = SumatoriaNetoDed
+    FilaAgregar["Neto A Pagar"] = SumatoriaNetoDev - abs(SumatoriaNetoDed)
+    # Informacion general de provisiones y SS             
+    FilaAgregar["EPS"] = ContratoPos['EPS'].unique().sum()
+    FilaAgregar["AFP"] = ContratoPos['AFP'].unique().sum()
+    FilaAgregar["ARL"] = ContratoPos['ARL'].unique().sum()
+    FilaAgregar["Riesgo ARL"] = ContratoPos['Riesgo ARL'].unique().sum()
+    FilaAgregar["CCF"] = ContratoPos['CCF'].unique().sum()
+    FilaAgregar["SENA"] = ContratoPos['SENA'].unique().sum()
+    FilaAgregar["ICBF"]  = ContratoPos['ICBF'].unique().sum()
+    FilaAgregar["Total Seguridad Social"] = ContratoPos['EPS'].unique().sum() + ContratoPos['AFP'].unique().sum() + ContratoPos['ARL'].unique().sum() + ContratoPos['CCF'].unique().sum() + ContratoPos['SENA'].unique().sum() + ContratoPos['ICBF'].unique().sum()
+    FilaAgregar["Vacaciones tiempo"] = ContratoPos['Vacaciones tiempo'].unique().sum()
+    FilaAgregar["Prima"] = ContratoPos['Prima'].unique().sum()
+    FilaAgregar["Cesantías"] = ContratoPos['Cesantías'].unique().sum()
+    FilaAgregar["Interés cesantías"] = ContratoPos['Interés cesantías'].unique().sum()
+    FilaAgregar["Total provisiones"] = ContratoPos['Vacaciones tiempo'].unique().sum() + ContratoPos['Prima'].unique().sum() + ContratoPos['Cesantías'].unique().sum() + ContratoPos['Interés cesantías'].unique().sum()
+    Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
+    return Horizontal  
+
+# ------------------------------------------------------------------------------------------
 # Funcion principal
-def procesar(df1):
+def procesar(df1, IdProceso):
     
     # Dataframe final
     Horizontal = pd.DataFrame()
+    # Datos generales
     Contrato  = df1['Numero de Contrato'].unique().tolist()
     IDPeriodo = df1['ID Periodo'].tolist()
     IDPeriodo = np.unique(IDPeriodo)
@@ -61,79 +140,20 @@ def procesar(df1):
             Valores = df1['Numero de Contrato'] == str(i)
             ContratoPos = df1[Valores]
             Valores2 = ContratoPos['ID Periodo'] == int(j)
-            ContratoPos = ContratoPos[Valores2]
-            if ContratoPos.empty == False:
-                FilaAgregar = {}
-                ##Informacion general inicial
-                FilaAgregar["Estado Nomina"] = ContratoPos.iloc[0]['Estado Nomina']
-                FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
-                FilaAgregar["Empresa"] = ContratoPos.iloc[0]['Empresa']
-                FilaAgregar["ID Periodo"] = ContratoPos.iloc[0]['ID Periodo']
-                FilaAgregar["Tipo de Perido"] = ContratoPos.iloc[0]['Tipo de Perido']
-                FilaAgregar["Mes"] = ContratoPos.iloc[0]['Mes']
-                FilaAgregar["Numero de Contrato"] = ContratoPos.iloc[0]['Numero de Contrato']
-                FilaAgregar["Nombres y Apellidos"] = ContratoPos.iloc[0]['Nombres y Apellidos']
-                FilaAgregar["Numero de Identificación"] = ContratoPos.iloc[0]['Numero de Identificación']
-                FilaAgregar["Centro de Costo"] = ContratoPos.iloc[0]['Centro de Costo']   
-                if(ContratoPos.iloc[0]['Dependencia']):
-                    FilaAgregar["Dependencia"] = ContratoPos.iloc[0]['Dependencia']
-                if(ContratoPos.iloc[0]['Proceso']):
-                    FilaAgregar["Proceso"] = ContratoPos.iloc[0]['Proceso']
-                FilaAgregar["Fecha Ingreso"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Ingreso']).date()
-                FilaAgregar["Fecha Retiro"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Retiro']).date()
-                FilaAgregar["Cargo"] = ContratoPos.iloc[0]['Cargo']
-                FilaAgregar["Salario Base"] = ContratoPos.iloc[0]['Salario Base']
-                SumatoriaNetoDev = 0
-                SumatoriaNetoDed = 0
-                #Ciclo para tomar informacion de los conceptos
-                for elemento in ConceptosDev:
-                    de = ContratoPos["Concepto"] == str(elemento)
-                    Conce= ContratoPos[de]
-                    Unidades = 0
-                    Neto = 0
-                    if (Conce.empty == False):
-                        Unidades = Conce["Horas"].sum()
-                        Neto = Conce["Neto"].sum()
-                        SumatoriaNetoDev += Neto
-                    if (elemento + " / Neto" in FilaAgregar):
-                        FilaAgregar[elemento + " / Unidades"] += Unidades
-                        FilaAgregar[elemento + " / Neto"] += Neto 
-                    else:
-                        FilaAgregar[elemento + " / Unidades"] = Unidades
-                        FilaAgregar[elemento + " / Neto"] = Neto 
-                FilaAgregar["Total Devengo"] = SumatoriaNetoDev
-                for elemento in ConceptosDed:
-                    de = ContratoPos["Concepto"] == str(elemento)
-                    Conce= ContratoPos[de]
-                    Unidades = 0
-                    Neto = 0
-                    if (Conce.empty == False):
-                        Unidades = Conce["Horas"].sum()
-                        Neto = Conce["Neto"].sum()
-                        SumatoriaNetoDed += Neto
-                    if (elemento + " / Neto" in FilaAgregar):
-                        FilaAgregar[elemento + " / Unidades"] += Unidades
-                        FilaAgregar[elemento + " / Neto"] += Neto 
-                    else:
-                        FilaAgregar[elemento + " / Unidades"] = Unidades
-                        FilaAgregar[elemento + " / Neto"] = Neto 
-                FilaAgregar["Total Deduccion"] = SumatoriaNetoDed
-                FilaAgregar["Neto A Pagar"] = SumatoriaNetoDev - abs(SumatoriaNetoDed)
-                # Informacion general de provisiones y SS             
-                FilaAgregar["EPS"] = ContratoPos['EPS'].unique().sum()
-                FilaAgregar["AFP"] = ContratoPos['AFP'].unique().sum()
-                FilaAgregar["ARL"] = ContratoPos['ARL'].unique().sum()
-                FilaAgregar["Riesgo ARL"] = ContratoPos['Riesgo ARL'].unique().sum()
-                FilaAgregar["CCF"] = ContratoPos['CCF'].unique().sum()
-                FilaAgregar["SENA"] = ContratoPos['SENA'].unique().sum()
-                FilaAgregar["ICBF"]  = ContratoPos['ICBF'].unique().sum()
-                FilaAgregar["Total Seguridad Social"] = ContratoPos['EPS'].unique().sum() + ContratoPos['AFP'].unique().sum() + ContratoPos['ARL'].unique().sum() + ContratoPos['CCF'].unique().sum() + ContratoPos['SENA'].unique().sum() + ContratoPos['ICBF'].unique().sum()
-                FilaAgregar["Vacaciones tiempo"] = ContratoPos['Vacaciones tiempo'].unique().sum()
-                FilaAgregar["Prima"] = ContratoPos['Prima'].unique().sum()
-                FilaAgregar["Cesantías"] = ContratoPos['Cesantías'].unique().sum()
-                FilaAgregar["Interés cesantías"] = ContratoPos['Interés cesantías'].unique().sum()
-                FilaAgregar["Total provisiones"] = ContratoPos['Vacaciones tiempo'].unique().sum() + ContratoPos['Prima'].unique().sum() + ContratoPos['Cesantías'].unique().sum() + ContratoPos['Interés cesantías'].unique().sum()
-                Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
+            if IdProceso == "Agrupar ID proceso":
+                ContratoPos = ContratoPos[Valores2]
+                if ContratoPos.empty == False:
+                    Horizontal = generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal)
+            else:
+                ContratoPos2 = ContratoPos[Valores2]
+                ID_Procesos = ContratoPos2['Id Proceso'].unique().tolist()
+                for k in ID_Procesos:
+                    # Valido los contrato pos que tiene mi id proceso
+                    Valores3 = ContratoPos2['Id Proceso'] == int(k)
+                    # traigo de nuevo dataframe la fila o registro que contiene el proceso analizado y lo almaceno en contratopos
+                    ContratoPos = ContratoPos2[Valores3]
+                    if ContratoPos.empty == False:
+                        Horizontal = generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal)
             
     # Dataframe final para obtener los indices de las primeras columnas 
     Horizontal_heads_end = pd.DataFrame()
@@ -207,16 +227,19 @@ def procesar(df1):
 
 def validar_contenido_id():  
     if(estado == '1'):
-        IdPeriodo1 = sys.argv[2]
+        IdProceso = sys.argv[2]
+        IdPeriodo1 = sys.argv[3]
         IdPeriodo = '['+IdPeriodo1+']'
     elif(estado == '2'):
-        IdPeriodo1 = sys.argv[2]
-        IdPeriodo2 = sys.argv[3]
+        IdProceso = sys.argv[2]
+        IdPeriodo1 = sys.argv[3]
+        IdPeriodo2 = sys.argv[4]
         IdPeriodo = '['+IdPeriodo1+','+IdPeriodo2+']'
     else:
-        IdPeriodo1 = sys.argv[2]
-        IdPeriodo2 = sys.argv[3]
-        IdPeriodo3 = sys.argv[4]
+        IdProceso = sys.argv[2]
+        IdPeriodo1 = sys.argv[3]
+        IdPeriodo2 = sys.argv[4]
+        IdPeriodo3 = sys.argv[5]
         IdPeriodo = '['+IdPeriodo1+','+IdPeriodo2+','+IdPeriodo3+']'
 
     #Traer información
@@ -227,15 +250,16 @@ def validar_contenido_id():
     if(df1.empty):
         print("No existe registro")
     else:
-        Documento_one = procesar(df1)
+        Documento_one = procesar(df1, IdProceso)
         print(Documento_one)
       
 # ------------------------------------------------------------------------------------------
 # Si llegó mas de un ID primero válide la empresa usuaria
 def validar_empresa():
     if(estado == '2'):
-        IdPeriodo1 = sys.argv[2]
-        IdPeriodo2 = sys.argv[3]
+        IdProceso = sys.argv[2]
+        IdPeriodo1 = sys.argv[3]
+        IdPeriodo2 = sys.argv[4]
         #Traer información
         URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo1
         URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo2
@@ -259,13 +283,14 @@ def validar_empresa():
             if(empresa_one == empresa_two):
                 validar_contenido_id()
             else:
-                Documento_one = procesar(dataf1)
-                Documento_two = procesar(dataf2)
+                Documento_one = procesar(dataf1, IdProceso)
+                Documento_two = procesar(dataf2, IdProceso)
                 print(Documento_one + ',' + Documento_two)
     if(estado == '3'):
-        IdPeriodo1 = sys.argv[2]
-        IdPeriodo2 = sys.argv[3]
-        IdPeriodo3 = sys.argv[4]
+        IdProceso = sys.argv[2]
+        IdPeriodo1 = sys.argv[3]
+        IdPeriodo2 = sys.argv[4]
+        IdPeriodo3 = sys.argv[5]
         #Traer información
         URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo1
         URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo2
@@ -298,9 +323,9 @@ def validar_empresa():
             if(empresa_one == empresa_two == empresa_three):
                 validar_contenido_id()
             else:
-                Documento_one = procesar(dataf1)
-                Documento_two = procesar(dataf2)
-                Documento_three = procesar(dataf3)
+                Documento_one = procesar(dataf1,IdProceso)
+                Documento_two = procesar(dataf2,IdProceso)
+                Documento_three = procesar(dataf3,IdProceso)
                 print(Documento_one + ',' + Documento_two + ',' + Documento_three)
 
 # ------------------------------------------------------------------------------------------

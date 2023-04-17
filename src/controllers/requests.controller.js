@@ -1,5 +1,6 @@
 // Almacenar objeto de funciones de enrutamiento - pertenece a router
 const requestsController = {}
+const { log } = require('console');
 // Variables compartidas
 const fs = require('fs');
 const spawn = require("child_process").spawn;
@@ -17,24 +18,25 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
     // Obtener IDPeriodos
     let process;
     let estado = 0;
+    let data_0 = ID_received.idproceso;
     let data_1 = ID_received.idperiodo;
     let data_2 = ID_received.idperiodo2;
     let data_3 = ID_received.idperiodo3;
-    console.log(data_1,data_2,data_3);
+    //console.log(data_0,data_1,data_2,data_3);
     if(data_1 !== undefined && data_1 !== null && data_2 === undefined || data_2 === null || data_2 === "" && data_3 === undefined)
     {
         estado = 1;
-        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_1]);
+        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_0,data_1]);
     }
     else if(data_1 !== undefined && data_1 !== null && data_2 !== undefined && data_2 !== null && data_3 === undefined || data_3 === null || data_3 === "")
     {
         estado = 2;
-        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_1,data_2]);
+        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_0,data_1,data_2]);
     }   
     else if(data_1 !== undefined && data_1 !== null && data_2 !== undefined && data_2 !== null && data_3 !== undefined && data_3 !== null)
     {
         estado = 3;
-        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_1,data_2,data_3]);
+        process = spawn('python',["./src/python/ReporteHorizontal.py",estado,data_0,data_1,data_2,data_3]);
     }
     if(estado != 0){
         // const process = spawn('python',["./src/python/ReporteHorizontal.py",data]);
@@ -67,12 +69,14 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
 
 // Txt
 requestsController.ReporteTxtResponse = (req, res) => {
+
     let data_1 = req.body.Data.empresa;
     let data_2 = req.body.Data.anio;
     let data_3 = req.body.Data.mes;
-
-    if(data_1 != "" && data_2 != "" && data_3 != ""){
-        const process = spawn('python',["./src/python/TXTSS.py",data_1,data_2,data_3]);
+    let data_4 = req.body.Data.groups;
+    
+    if(data_1 != "" && data_2 != "" && data_3 != "" && data_4 != null){
+        const process = spawn('python',["./src/python/TXTSS.py",data_1,data_2,data_3,data_4]);
         process.stderr.on("data",(data)=>{
             console.error('stderr:',data.toString());
         })
@@ -83,6 +87,20 @@ requestsController.ReporteTxtResponse = (req, res) => {
             if(Nombre_txt == "No existe registro"){res.json({process: '0', result: 'No hay Reporte TXTSS'});}
             else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_txt});})}
         });
+    }
+    else if(data_1 != "" && data_2 != "" && data_3 != "" && data_4 == null){
+        data_4 = "Search_group";
+        const process = spawn('python',["./src/python/TXTSS.py",data_1,data_2,data_3,data_4]);
+        process.stderr.on("data",(data)=>{
+            console.error('stderr:',data.toString());
+        })
+        process.stdout.on('data', (data) => {
+            Group_List_ = data.toString();
+            Group_List_ = Group_List_.split("\r\n").join("");
+            Group_List_ = Group_List_.split("\n").join("");
+            if(Group_List_ == "No existe registro"){res.json({process: '0', result: 'No hay Reporte TXTSS'});}
+            else{process.stdout.on('end', function(data) {res.json({process: '2', result: Group_List_});})}
+        }); 
     }
     else{
         res.json({process: '0',result: 'No hay datos TXTSS'});

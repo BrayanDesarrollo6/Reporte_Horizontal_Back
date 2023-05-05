@@ -22,7 +22,9 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
     let data_1 = ID_received.idperiodo;
     let data_2 = ID_received.idperiodo2;
     let data_3 = ID_received.idperiodo3;
+
     //console.log(data_0,data_1,data_2,data_3);
+    
     if(data_1 !== undefined && data_1 !== null && data_2 === undefined || data_2 === null || data_2 === "" && data_3 === undefined)
     {
         estado = 1;

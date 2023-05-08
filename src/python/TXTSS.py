@@ -28,7 +28,7 @@ def procesarTXTSS(NombreTemporal,Anio,Mes,Grupo):
     TXT_Final = pd.DataFrame()
     
     # URL DEL XLS DE SS
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=" + NombreTemporal_ + "&PENSION_ANO=" + Anio + "&PENSION_MES=" + Mes + "&agrupacion_de_empresa_seg_soc=" + Grupo
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=" + NombreTemporal_ + "&PENSION_ANO=" + Anio + "&PENSION_MES=" + Mes + "&CLIENTE1.agrupacion_de_empresa_LP_cli=" + Grupo
     # URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/TXT_SS_DESARROLLO/3HO1RZORhePyRgar44EefyEhhD27umsJE7GeJJhCDwwx2ngQ2KEHHGTCB1mYQtFktzmgSyHG2qRWsnu3ZGbW8N97TZtX709N3DAC?NOMBRE_EMPRESA=HQ5%20S.A.S&PENSION_ANO=2022&PENSION_MES=10"
     #CNVERTIR XLS EN DATAFRAME
     df = pd.read_excel(URL)

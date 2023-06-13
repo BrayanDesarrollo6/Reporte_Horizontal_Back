@@ -5,7 +5,61 @@ GET http://localhost:4000/ReporteHorizontal
 GET http://localhost:4000/Txt
 
 ###
-POST http://localhost:4000/procesar
+POST http://localhost:4001/plantilla
+content-type: application/json
+
+{
+    "ID":"3960020000076795039",
+    "form": "TERCEROS",
+    "temporal": "HQ5 S.A.S",
+    "id_temporal":"123456",
+    "cliente":"HQ5 SAS",
+    "id_cliente":"654321",
+    "empleados":"ACTIVO",
+    "concepto":"Prestamo Empresa hq5",
+    "id_concepto":"123456789",
+    "fecha":"30-Jun-2023"
+}
 
 ###
+POST http://localhost:4001/plantilla
+content-type: application/json
+
+{
+    "ID":"3960020000076795039",
+    "form": "LIQUIDACION",
+    "temporal": "HQ5 S.A.S",
+    "id_temporal":"123456",
+    "cliente":"HQ5 SAS",
+    "id_cliente":"654321",
+    "empleados":"ACTIVO",
+    "concepto":"Prestamo Empresa hq5",
+    "id_concepto":"123456789",
+    "periodo":"39598",
+    "id_periodo":"3960020000073408238"
+}
+
+###
+POST http://localhost:4001/plantilla
+content-type: application/json
+
+{
+    "ID":"3960020000076806515",
+    "form": "NOVEDADES",
+    "temporal": "HQ5 S.A.S",
+    "id_temporal":"123456",
+    "cliente":"HQ5 SAS",
+    "id_cliente":"654321",
+    "empleados":"ACTIVO",
+    "concepto":"Prestamo Empresa hq5",
+    "id_concepto":"123456789",
+    "periodo":"39598",
+    "id_periodo":"3960020000073408238"
+}
+
+### 
 POST https://backcompensaciones.gestionhq5.com.co/certificadoaportes
+
+###
+GET http://localhost:4001/plantilla
+

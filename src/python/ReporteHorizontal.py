@@ -159,7 +159,7 @@ def procesar(df1, IdProceso):
     Horizontal_heads_end = pd.DataFrame()
     Horizontal_heads_end = Horizontal
             
-    NombreDocumento = "Horizontal " + Horizontal.iloc[0]['Empresa'] +"-"+ str(Horizontal.iloc[0]['Mes'])+ "-" + str(Horizontal.iloc[0]['Tipo de Perido'])
+    NombreDocumento = "Horizontal " + str(Horizontal.iloc[0]['Empresa']) +"-"+ str(Horizontal.iloc[0]['Mes'])+ "-" + str(Horizontal.iloc[0]['Tipo de Perido'])
     # Normalizar nombre del documento
     NombreDocumento = normalize(NombreDocumento)
     NombreDocumento = replacement(NombreDocumento)

@@ -13,4 +13,7 @@ router.get('/procesar3', requestController.ReporteHorizontalResponseDocument3)
 router.post('/procesarTXTSS', requestController.ReporteTxtResponse)
 router.get('/procesarTXTSS', requestController.ReporteTxtResponseDocument)
 
+// Ruta 3 - Plantillas Excel
+router.post('/plantilla', requestController.PlantillaExcelProcess)
+
 module.exports = router;

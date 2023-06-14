@@ -16,4 +16,6 @@ router.get('/procesarTXTSS', requestController.ReporteTxtResponseDocument)
 // Ruta 3 - Plantillas Excel
 router.post('/plantilla', requestController.PlantillaExcelProcess)
 
+// Ruta 4 - Reporte liquidaciones
+router.post('/getEmpresas', requestController.obtenerEmpresas)
 module.exports = router;

@@ -172,6 +172,27 @@ requestsController.PlantillaExcelProcess = (req, res) => {
         });
     }
 }
+//
+// ObtenerEmpresas
+requestsController.obtenerEmpresas = (req, res) => {
+    const ID_received = req.body.Data;
+    // Obtener IDPeriodos
+    let process;
+    let estado = ID_received;
 
+    process = spawn('python',["./src/python/obtenerEmpresas.py",estado]);
+    
+    process.stderr.on("data",(data)=>{
+        console.error('stderr:',data.toString());
+    })
+    process.stdout.on('data', (data) => {
+        console.log(data.toString())
+        Group_List_ = data.toString();
+        Group_List_ = Group_List_.split("\r\n").join("");
+        Group_List_ = Group_List_.split("\n").join("");
+        if(Group_List_ == "No existe registro"){res.json({process: '0', result: 'No hay Empresas'});}
+        else{process.stdout.on('end', function(data) {res.json({process: '2', result: Group_List_});})}
+    });
+};
 // Exportar módulo
 module.exports = requestsController;

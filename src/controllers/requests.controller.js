@@ -172,27 +172,45 @@ requestsController.PlantillaExcelProcess = (req, res) => {
         });
     }
 }
-//
+
 // ObtenerEmpresas
 requestsController.obtenerEmpresas = (req, res) => {
     const ID_received = req.body.Data;
     // Obtener IDPeriodos
     let process;
     let estado = ID_received;
-
     process = spawn('python',["./src/python/obtenerEmpresas.py",estado]);
-    
     process.stderr.on("data",(data)=>{
         console.error('stderr:',data.toString());
     })
     process.stdout.on('data', (data) => {
         console.log(data.toString())
-        Group_List_ = data.toString();
-        Group_List_ = Group_List_.split("\r\n").join("");
-        Group_List_ = Group_List_.split("\n").join("");
+        Company_List_ = data.toString();
+        Company_List_ = Company_List_.split("\r\n").join("");
+        Company_List_ = Company_List_.split("\n").join("");
         if(Group_List_ == "No existe registro"){res.json({process: '0', result: 'No hay Empresas'});}
         else{process.stdout.on('end', function(data) {res.json({process: '2', result: Group_List_});})}
     });
 };
+
+// Reporte Liquidaciones
+requestsController.ReporteLiquidacionResponse = (req, res) => {
+    let data_1 = req.body.Data.empresa;
+    let data_2 = req.body.Data.estados;
+    let data_3 = req.body.Data.anio;
+    let data_4 = req.body.Data.mes;
+    const process = spawn('python',["./src/python/reporteLiquidaciones.py",data_1,data_2,data_3,data_4]);
+    process.stderr.on("data",(data)=>{
+        console.error('stderr:',data.toString());
+    })
+    process.stdout.on('data', (data) => {
+        Nombre_Horizontal = data.toString();
+        Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
+        Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
+        if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
+        else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
+    });
+}  
+
 // Exportar módulo
 module.exports = requestsController;

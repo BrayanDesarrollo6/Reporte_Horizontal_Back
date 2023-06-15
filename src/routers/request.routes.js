@@ -18,4 +18,5 @@ router.post('/plantilla', requestController.PlantillaExcelProcess)
 
 // Ruta 4 - Reporte liquidaciones
 router.post('/getEmpresas', requestController.obtenerEmpresas)
+router.post('/procesarlq', requestController.ReporteLiquidacionResponse)
 module.exports = router;

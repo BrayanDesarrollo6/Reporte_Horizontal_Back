@@ -125,7 +125,7 @@ def procesarTXTSS(NombreTemporal,Anio,Mes,Grupo):
 
         ##Para exportar en txt
         NombreTXT_ = "TXT-" + NombreTemporal_ + "-" + Anio + "-" + Mes 
-        file_name = open("./src/database/"+NombreTXT_ + ".txt", "w+", encoding="ANSI")
+        file_name = open("./src/database/"+NombreTXT_ + ".txt", "w+")
         Texto_ = ""
         for fila in TXT_Final["TXT"]:
             Texto_ += (str(fila)+"\n")

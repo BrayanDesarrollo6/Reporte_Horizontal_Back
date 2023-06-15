@@ -28,12 +28,12 @@ def replacement(name_company):
     return name_company
 
 def procesar(df,df3):
-     # Dataframe final
+    # Dataframe final
     Horizontal = pd.DataFrame()
-    Contrato  = df['Numero de Contrato'].unique().tolist()
+    Contrato = df['Numero de Contrato'].unique().tolist()
     IDLiquidacion = df['Id Proceso'].tolist()
     IDLiquidacion = np.unique(IDLiquidacion)
-    #Filtrar cada concepto unico que existe en ese reporte
+    # Filtrar cada concepto unico que existe en ese reporte
     Conceptos = df['Concepto'].unique().tolist()
     Conceptos.sort()
     ConceptosDev = []
@@ -41,14 +41,14 @@ def procesar(df,df3):
     for conceptosx in Conceptos:
         Valores = df['Concepto'] == str(conceptosx)
         ContratoPos = df[Valores]
-        #Sumatoria
+        # Sumatoria
         Total = ContratoPos['Neto'].sum()
         if(Total >= 0 ):
             ConceptosDev.append(conceptosx)
         else:
             ConceptosDed.append(conceptosx)
     Conceptos.clear()
-    Conceptos= ConceptosDev + ConceptosDed
+    Conceptos = ConceptosDev + ConceptosDed
     
     for j in IDLiquidacion:
         Valores = df['Id Proceso'] == j
@@ -57,7 +57,7 @@ def procesar(df,df3):
             FilaAgregar = {}
             SumatoriaNetoprestaciones = 0
             Subtotal = 0
-            ##Informacion general inicial
+            # Informacion general inicial
             FilaAgregar["Id Proceso"] = ContratoPos.iloc[0]['Id Proceso']
             FilaAgregar["Estado"] = ContratoPos.iloc[0]['Estado']
             FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
@@ -70,11 +70,10 @@ def procesar(df,df3):
             FilaAgregar["Fecha Retiro"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Retiro']).date()
             FilaAgregar["Cargo"] = ContratoPos.iloc[0]['Cargo']
             FilaAgregar["Salario Base"] = ContratoPos.iloc[0]['Salario Base']
-            #SE REVISA LOS CONCEPTOS DE LIQUIDACION PARA CADA UNA 
-            # LEYENDO PARA CADA 1
+            # SE REVISA LOS CONCEPTOS DE LIQUIDACION PARA CADA UNA LEYENDO PARA CADA 1
             SumatoriaNetoDev = 0
             SumatoriaNetoDed = 0
-            #Ciclo para tomar informacion de los conceptos
+            # Ciclo para tomar informacion de los conceptos
             for elemento in ConceptosDev:
                 de = ContratoPos["Concepto"] == str(elemento)
                 Conce= ContratoPos[de]
@@ -133,7 +132,7 @@ def procesar(df,df3):
                         FilaAgregar[str(elemento) + " / Neto"] = Neto
                 FilaAgregar["Subtotal a pagar prestaciones"] = SumatoriaNetoprestaciones
             
-            ##INDEMNIZACION
+            # INDEMNIZACION
             FilaAgregar["Indemnización / Neto"] = ContratoPos.iloc[0]['Sub Total Neto']
             NetoIndemnizacion = 0
             NetoIndemnizacion = ContratoPos.iloc[0]['Sub Total Neto'].sum()
@@ -208,15 +207,12 @@ def procesar(df,df3):
     return NombreDocumento+".xlsx"
 
 
+
 Empresa_ = "RANSA COLOMBIA SAS".replace(" ", "%20")    
-# Estado_ = "[Enviada a Pago,Pagada,Pendiente,Enviada a Aprobación,Aprobada]".replace(" ","%20")
-# Estado_ = "[Enviada a Pago,Pagada,Pendiente]".replace(" ","%20")
 Estado_ = "[Enviada a Pago,Enviada a pago sin paz y salvo,Pagada,Pendiente]".replace(" ","%20")
-#Traer información
-# URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Generar_Re_Liquidaci_n_Report/U6jN3utwhQmfu2D7CqC6Mp20sh3J8xjHSdjtAN6GsxsqvuKYk0MEQ0vUHgyFwPdPOKj5B5mXmW5bNrK3yPDR3w3t1CPj5dDex2PR?Empresa_Usuaria="+Empresa_+"&Estado="+Estado_
+# Traer información
 URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Liquidaci_n_Retiros_Report/JPdZda7vkNjCJEanQ6P4x4eBB6m8BJKR4wfNXDSyz5q2qdn8nZdjdz0nFvaqYaegJ5qSmj8pnkNqTMTYwwhtwJW1XPR2ae2Vdmbe?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_
             
-# url_ = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prenomina/WWjRAOJ2MGyyNGd5BxdvwApYGzgq5A9AQ5Q6bUmpsTQvWTMJE4qE5MyKnY4KKPXneurq8RnTZ2O698AO8N2KQ7Fa7qt4hpwSet0K?Periodo=" + _idPeriodo + "&zc_FileName=PreNomina_" + _idPeriodo;
 df = pd.read_excel(URL)
 df1 = pd.DataFrame(df)
 # RECORRER LAS PRESTACIONES SOCIALES

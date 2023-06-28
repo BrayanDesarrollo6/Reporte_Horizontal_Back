@@ -7,6 +7,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
+import json
 
 # Obtener si es para liquidacion o reliquidacion
 estado = sys.argv[1]
@@ -19,7 +20,20 @@ if estado == "1":
 df = pd.read_excel(URL)
 df1 = pd.DataFrame(df)
 
-Empresas = df1['Empresa Usuaria'].unique().tolist()
-Estados = df1['Estado'].unique().tolist()
-
-print("Proceso ejecutado")
+if(df1.empty == False):
+    File_Json = {}
+    Empresas = df1['Empresa Usuaria'].unique().tolist()
+    File_Json["Empresas"] = Empresas
+    Estados = df1['Estado'].unique().tolist()
+    File_Json["Estados"] = Estados
+    if estado == "0":
+        with open("./src/database/VariablesEntornoLQ.json","w") as file:
+            json.dump(File_Json, file, indent=4)
+        print("VariablesEntornoLQ.json")    
+    if estado == "1":
+        with open("./src/database/VariablesEntornoReLQ.json","w") as file:
+            json.dump(File_Json, file, indent=4)
+        print("VariablesEntornoReLQ.json")
+    
+else:
+    print("No existe registro")

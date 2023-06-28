@@ -5,7 +5,7 @@ const { log } = require('console');
 const fs = require('fs');
 const spawn = require("child_process").spawn;
 const utf8 = require('utf8');
-// Variables Reporte Horizontal
+// Variables Reporte Nomina, LQ y ReLQ
 const XLSX = require('xlsx');
 var Nombre_Horizontal = "";
 var Lista_nombres = [];
@@ -14,8 +14,8 @@ var Nombre_txt = "";
 
 // Reporte Horizontal
 requestsController.ReporteHorizontalResponse = (req, res) => {
+
     const ID_received = req.body.Data;
-    // Obtener IDPeriodos
     let process;
     let estado = 0;
     let data_0 = ID_received.idproceso;
@@ -23,8 +23,6 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
     let data_2 = ID_received.idperiodo2;
     let data_3 = ID_received.idperiodo3;
 
-    //console.log(data_0,data_1,data_2,data_3);
-    
     if(data_1 !== undefined && data_1 !== null && data_2 === undefined || data_2 === null || data_2 === "" && data_3 === undefined)
     {
         estado = 1;
@@ -69,6 +67,35 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
     }
 };
 
+// Funcion de leer excel
+function leerexcel(Lista_nombre){
+    const workBook = XLSX.readFile('./src/database/'+Lista_nombre);
+    const workbooksheet = workBook.SheetNames;
+    const sheet = workbooksheet[0];
+    const dataExcel = XLSX.utils.sheet_to_json(workBook.Sheets[sheet]);
+}
+
+// Función descargar Archivo reporte horizontal
+requestsController.ReporteHorizontalResponseDocument = (req, res) => {
+    // leerexcel(Lista_nombres[0]);
+    res.download('./src/database/'+Lista_nombres[0]); 
+    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[0]);},"100")
+}
+
+// Función descargar Archivo reporte horizontal 2
+requestsController.ReporteHorizontalResponseDocument2 = (req, res) => {
+    // leerexcel(Lista_nombres[1]);
+    res.download('./src/database/'+Lista_nombres[1]); 
+    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[1]);},"100")
+}
+
+// Función descargar Archivo reporte horizontal 3
+requestsController.ReporteHorizontalResponseDocument3 = (req, res) => {
+    // leerexcel(Lista_nombres[2]);
+    res.download('./src/database/'+Lista_nombres[2]); 
+    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[2]);},"100")
+}
+
 // Txt
 requestsController.ReporteTxtResponse = (req, res) => {
 
@@ -108,35 +135,6 @@ requestsController.ReporteTxtResponse = (req, res) => {
         res.json({process: '0',result: 'No hay datos TXTSS'});
     }
 }   
-
-// Funcion de leer excel
-function leerexcel(Lista_nombre){
-    const workBook = XLSX.readFile('./src/database/'+Lista_nombre);
-    const workbooksheet = workBook.SheetNames;
-    const sheet = workbooksheet[0];
-    const dataExcel = XLSX.utils.sheet_to_json(workBook.Sheets[sheet]);
-}
-
-// Función descargar Archivo reporte horizontal
-requestsController.ReporteHorizontalResponseDocument = (req, res) => {
-    // leerexcel(Lista_nombres[0]);
-    res.download('./src/database/'+Lista_nombres[0]); 
-    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[0]);},"100")
-}
-
-// Función descargar Archivo reporte horizontal 2
-requestsController.ReporteHorizontalResponseDocument2 = (req, res) => {
-    // leerexcel(Lista_nombres[1]);
-    res.download('./src/database/'+Lista_nombres[1]); 
-    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[1]);},"100")
-}
-
-// Función descargar Archivo reporte horizontal 3
-requestsController.ReporteHorizontalResponseDocument3 = (req, res) => {
-    // leerexcel(Lista_nombres[2]);
-    res.download('./src/database/'+Lista_nombres[2]); 
-    setTimeout(() => {fs.unlinkSync('./src/database/'+Lista_nombres[2]);},"100")
-}
 
 // Funcion descargar Archivo TxtSS
 requestsController.ReporteTxtResponseDocument = (req, res) => {
@@ -184,14 +182,38 @@ requestsController.obtenerEmpresas = (req, res) => {
         console.error('stderr:',data.toString());
     })
     process.stdout.on('data', (data) => {
-        console.log(data.toString())
-        Company_List_ = data.toString();
-        Company_List_ = Company_List_.split("\r\n").join("");
-        Company_List_ = Company_List_.split("\n").join("");
-        if(Group_List_ == "No existe registro"){res.json({process: '0', result: 'No hay Empresas'});}
-        else{process.stdout.on('end', function(data) {res.json({process: '2', result: Group_List_});})}
+        Respuesta = data.toString();
+        Respuesta = Respuesta.split("\r\n").join("");
+        Respuesta = Respuesta.split("\n").join("");
+        console.log(Respuesta);
+        if(Respuesta == "No existe registro"){res.json({process: '0', result: 'No hay Empresas'});}
+        else{process.stdout.on('end', function(data) {res.json({process: '1', result: Respuesta});})}
     });
 };
+
+// Funcion enviar Archivo Json Empresas
+requestsController.enviarEmpresas = (req, res) => {
+    fs.readFile("./src/database/VariablesEntornoLQ.json", "utf8", (err, jsonString) => {
+    if (err) {
+        console.log("File read failed:", err);
+        return;
+    }
+    console.log("Enviando datos de consulta json");
+    res.json(JSON.parse(jsonString));
+    });
+}
+
+// Funcion enviar Archivo Json Empresas
+requestsController.enviarEmpresasrelq = (req, res) => {
+    fs.readFile("./src/database/VariablesEntornoReLQ.json", "utf8", (err, jsonString) => {
+    if (err) {
+        console.log("File read failed:", err);
+        return;
+    }
+    console.log("Enviando datos de consulta json");
+    res.json(JSON.parse(jsonString));
+    });
+}
 
 // Reporte Liquidaciones
 requestsController.ReporteLiquidacionResponse = (req, res) => {
@@ -205,12 +227,45 @@ requestsController.ReporteLiquidacionResponse = (req, res) => {
     })
     process.stdout.on('data', (data) => {
         Nombre_Horizontal = data.toString();
+        console.log(Nombre_Horizontal);
         Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
         Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
         if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
         else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
     });
 }  
+
+// Funcion descargar Archivo liquidaciones
+requestsController.ReporteLiquidacionResponseDocument = (req, res) => {
+    res.download('./src/database/'+Nombre_Horizontal); 
+    setTimeout(() => {fs.unlinkSync('./src/database/'+Nombre_Horizontal);}, "100")
+}
+
+// Reporte ReLiquidaciones
+requestsController.ReporteReLiquidacionResponse = (req, res) => {
+    let data_1 = req.body.Data.empresa;
+    let data_2 = req.body.Data.estados;
+    let data_3 = req.body.Data.anio;
+    let data_4 = req.body.Data.mes;
+    const process = spawn('python',["./src/python/reporteReliquidaciones.py",data_1,data_2,data_3,data_4]);
+    process.stderr.on("data",(data)=>{
+        console.error('stderr:',data.toString());
+    })
+    process.stdout.on('data', (data) => {
+        Nombre_Horizontal = data.toString();
+        Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
+        Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
+        console.log(Nombre_Horizontal);
+        if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
+        else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
+    });
+}  
+
+// Funcion descargar Archivo Reliquidaciones
+requestsController.ReporteReLiquidacionResponseDocument = (req, res) => {
+    res.download('./src/database/'+Nombre_Horizontal); 
+    setTimeout(() => {fs.unlinkSync('./src/database/'+Nombre_Horizontal);}, "100")
+}
 
 // Exportar módulo
 module.exports = requestsController;

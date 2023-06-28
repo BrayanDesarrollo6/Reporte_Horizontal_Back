@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-
 #improtar shortcuts, metodo para renderisar plantillas y optimizar codigo al cargar plantillas
 from django.shortcuts import render
 ##Librerias para el proceso del reporte horizontal

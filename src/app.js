@@ -17,11 +17,8 @@ app.use(express.json());
 // Recibir peticiones de otros puertos o host
 app.use(cors());
 // {origin: "http://localhost:4200"}
+
 // Routes
 app.use(require('./routers/request.routes'))
-
-// Parser
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
 
 module.exports = app;

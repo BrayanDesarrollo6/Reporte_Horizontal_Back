@@ -18,7 +18,6 @@ def normalize(s):
         s = s.replace(a, b).replace(a.upper(), b.upper())
     return s
 
-# ------------------------------------------------------------------------------------------
 # reemplazar caracteres
 def replacement(name_company):
     name_company = name_company.replace(".", "")
@@ -30,29 +29,33 @@ def replacement(name_company):
 def procesar(df,df3):
     # Dataframe final
     Horizontal = pd.DataFrame()
-    Contrato = df['Numero de Contrato'].unique().tolist()
-    IDLiquidacion = df['Id Proceso'].tolist()
+    Contrato = df3['Numero de Contrato'].unique().tolist()
+    IDLiquidacion = df3['Id Proceso'].tolist()
     IDLiquidacion = np.unique(IDLiquidacion)
     # Filtrar cada concepto unico que existe en ese reporte
-    Conceptos = df['Concepto'].unique().tolist()
-    Conceptos.sort()
-    ConceptosDev = []
-    ConceptosDed = []
-    for conceptosx in Conceptos:
-        Valores = df['Concepto'] == str(conceptosx)
-        ContratoPos = df[Valores]
-        # Sumatoria
-        Total = ContratoPos['Neto'].sum()
-        if(Total >= 0 ):
-            ConceptosDev.append(conceptosx)
-        else:
-            ConceptosDed.append(conceptosx)
-    Conceptos.clear()
-    Conceptos = ConceptosDev + ConceptosDed
+    if df.empty == False:
+        Conceptos = df['Concepto'].unique().tolist()
+        Conceptos.sort()
+        ConceptosDev = []
+        ConceptosDed = []
+        for conceptosx in Conceptos:
+            Valores = df['Concepto'] == str(conceptosx)
+            ContratoPos2 = df[Valores]
+            # Sumatoria
+            Total = ContratoPos2['Neto'].sum()
+            if(Total >= 0 ):
+                ConceptosDev.append(conceptosx)
+            else:
+                ConceptosDed.append(conceptosx)
+        Conceptos.clear()
+        Conceptos = ConceptosDev + ConceptosDed
     
     for j in IDLiquidacion:
+        Valores = df3['Id Proceso'] == j
+        ContratoPos = df3[Valores]
+        #CONCEPTOS DE LIQUIDACION DEL EMPLEADO
         Valores = df['Id Proceso'] == j
-        ContratoPos = df[Valores]
+        ContratoPosLiqui = df[Valores]
         if ContratoPos.empty == False:
             FilaAgregar = {}
             SumatoriaNetoprestaciones = 0
@@ -74,44 +77,43 @@ def procesar(df,df3):
             SumatoriaNetoDev = 0
             SumatoriaNetoDed = 0
             # Ciclo para tomar informacion de los conceptos
-            for elemento in ConceptosDev:
-                de = ContratoPos["Concepto"] == str(elemento)
-                Conce= ContratoPos[de]
-                Unidades = 0
-                Neto = 0
-                if (Conce.empty == False):
-                    Unidades = Conce["Unidades"].sum()
-                    Neto = Conce["Neto"].sum()
-                    SumatoriaNetoDev += Neto
-                if (elemento + " / Neto" in FilaAgregar):
-                    FilaAgregar[elemento + " / Unidades"] += Unidades
-                    FilaAgregar[elemento + " / Neto"] += Neto 
-                else:
-                    FilaAgregar[elemento + " / Unidades"] = Unidades
-                    FilaAgregar[elemento + " / Neto"] = Neto 
-            FilaAgregar["Total Devengo"] = SumatoriaNetoDev
-            for elemento in ConceptosDed:
-                de = ContratoPos["Concepto"] == str(elemento)
-                Conce= ContratoPos[de]
-                Unidades = 0
-                Neto = 0
-                if (Conce.empty == False):
-                    Unidades = Conce["Unidades"].sum()
-                    Neto = Conce["Neto"].sum()
-                    SumatoriaNetoDed += Neto
-                if (elemento + " / Neto" in FilaAgregar):
-                    FilaAgregar[elemento + " / Unidades"] += Unidades
-                    FilaAgregar[elemento + " / Neto"] += Neto 
-                else:
-                    FilaAgregar[elemento + " / Unidades"] = Unidades
-                    FilaAgregar[elemento + " / Neto"] = Neto 
-            FilaAgregar["Total Deduccion"] = SumatoriaNetoDed
-            FilaAgregar["Subtotal a pagar"] = SumatoriaNetoDev - abs(SumatoriaNetoDed)
-            Subtotal = SumatoriaNetoDev - abs(SumatoriaNetoDed)
-
-            if(df3.empty):
-                print("No existe registro")
-            else:
+            if df.empty == False:
+                for elemento in ConceptosDev:
+                    de = ContratoPosLiqui["Concepto"] == str(elemento)
+                    Conce= ContratoPosLiqui[de]
+                    Unidades = 0
+                    Neto = 0
+                    if (Conce.empty == False):
+                        Unidades = Conce["Unidades"].sum()
+                        Neto = Conce["Neto"].sum()
+                        SumatoriaNetoDev += Neto
+                    if (elemento + " / Neto" in FilaAgregar):
+                        FilaAgregar[elemento + " / Unidades"] += Unidades
+                        FilaAgregar[elemento + " / Neto"] += Neto 
+                    else:
+                        FilaAgregar[elemento + " / Unidades"] = Unidades
+                        FilaAgregar[elemento + " / Neto"] = Neto 
+                FilaAgregar["Total Devengo"] = SumatoriaNetoDev
+                for elemento in ConceptosDed:
+                    de = ContratoPosLiqui["Concepto"] == str(elemento)
+                    Conce= ContratoPosLiqui[de]
+                    Unidades = 0
+                    Neto = 0
+                    if (Conce.empty == False):
+                        Unidades = Conce["Unidades"].sum()
+                        Neto = Conce["Neto"].sum()
+                        SumatoriaNetoDed += Neto
+                    if (elemento + " / Neto" in FilaAgregar):
+                        FilaAgregar[elemento + " / Unidades"] += Unidades
+                        FilaAgregar[elemento + " / Neto"] += Neto 
+                    else:
+                        FilaAgregar[elemento + " / Unidades"] = Unidades
+                        FilaAgregar[elemento + " / Neto"] = Neto 
+                FilaAgregar["Total Deduccion"] = SumatoriaNetoDed
+                FilaAgregar["Subtotal a pagar"] = SumatoriaNetoDev - abs(SumatoriaNetoDed)
+                Subtotal = SumatoriaNetoDev - abs(SumatoriaNetoDed)
+                
+            if(df3.empty == False):
                 Valores = df3['Id Proceso'] == j
                 ConceptosPrestaciones = df3[Valores]
                 Conceptos = df3['Concepto'].unique().tolist()
@@ -132,11 +134,16 @@ def procesar(df,df3):
                         FilaAgregar[str(elemento) + " / Neto"] = Neto
                 FilaAgregar["Subtotal a pagar prestaciones"] = SumatoriaNetoprestaciones
             
-            # INDEMNIZACION
-            FilaAgregar["Indemnización / Neto"] = ContratoPos.iloc[0]['Sub Total Neto']
-            NetoIndemnizacion = 0
-            NetoIndemnizacion = ContratoPos.iloc[0]['Sub Total Neto'].sum()
-            FilaAgregar["Neto a pagar"] = SumatoriaNetoprestaciones + Subtotal + NetoIndemnizacion
+                # INDEMNIZACION
+                if(ContratoPosLiqui.empty == False):
+                    FilaAgregar["Indemnización / Neto"] = ContratoPosLiqui.iloc[0]['Sub Total Neto']
+                    NetoIndemnizacion = 0
+                    NetoIndemnizacion = ContratoPosLiqui.iloc[0]['Sub Total Neto'].sum()
+                    FilaAgregar["Neto a pagar"] = SumatoriaNetoprestaciones + Subtotal + NetoIndemnizacion
+                else:
+                    FilaAgregar["Indemnización / Neto"] = 0
+                    FilaAgregar["Neto a pagar"] = 0
+            
             Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
 
     # Dataframe final para obtener los indices de las primeras columnas 
@@ -183,9 +190,6 @@ def procesar(df,df3):
         
     worksheet.write_string(1, 1, str(Horizontal_heads_end.iloc[0]['Temporal']),format)
     worksheet.write_string(1, 2,str(Horizontal_heads_end.iloc[0]['Empresa']),format)
-    # worksheet.write_string(1, 3,str(Horizontal_heads_end.iloc[0]['ID Periodo']),format)
-    # worksheet.write_string(1, 4,str(Horizontal_heads_end.iloc[0]['Tipo de Perido']),format)
-    # worksheet.write_string(1, 5,str(Horizontal_heads_end.iloc[0]['Mes']),format)
     
     contador = 0
     MaxFilas = len(Horizontal.axes[0])
@@ -206,21 +210,36 @@ def procesar(df,df3):
     writer.close()
     return NombreDocumento+".xlsx"
 
-
-
-Empresa_ = "RANSA COLOMBIA SAS".replace(" ", "%20")    
-Estado_ = "[Enviada a Pago,Enviada a pago sin paz y salvo,Pagada,Pendiente]".replace(" ","%20")
-# Traer información
-URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Liquidaci_n_Retiros_Report/JPdZda7vkNjCJEanQ6P4x4eBB6m8BJKR4wfNXDSyz5q2qdn8nZdjdz0nFvaqYaegJ5qSmj8pnkNqTMTYwwhtwJW1XPR2ae2Vdmbe?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_
-            
-df = pd.read_excel(URL)
-df1 = pd.DataFrame(df)
-# RECORRER LAS PRESTACIONES SOCIALES
-URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Report/y61kfuHKTXYbNdxVSYEXRbwZVPz5QEZ6fJTTqRzpy9Pa46eO6r30tTdTAJSdaUKHNZNSJxuBqQwkZ64e7OFND2HVFs0kTr8SjQOz?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_
-df2 = pd.read_excel(URL)
-df3 = pd.DataFrame(df2)
-if(df1.empty):
+# -----------------------------
+Empresa = sys.argv[1]
+Estado = sys.argv[2]
+Anio = sys.argv[3]
+Mes = sys.argv[4]
+# -----------------------------
+Empresa_ = Empresa.replace(" ", "%20")
+Estado_ = Estado.replace(" ","%20")
+# -----------------------------
+if(Anio == "undefined" and Mes == "undefined"):    
+    # RECORRER LAS PRESTACIONES SOCIALES
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Liquidaci_n_Retiros_Report/JPdZda7vkNjCJEanQ6P4x4eBB6m8BJKR4wfNXDSyz5q2qdn8nZdjdz0nFvaqYaegJ5qSmj8pnkNqTMTYwwhtwJW1XPR2ae2Vdmbe?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_
+    df = pd.read_excel(URL)
+    df1 = pd.DataFrame(df)
+    # Traer información
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Report/y61kfuHKTXYbNdxVSYEXRbwZVPz5QEZ6fJTTqRzpy9Pa46eO6r30tTdTAJSdaUKHNZNSJxuBqQwkZ64e7OFND2HVFs0kTr8SjQOz?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_            
+    df2 = pd.read_excel(URL)
+    df3 = pd.DataFrame(df2)
+else:
+    date = Anio + "-" + Mes + "-01"
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Liquidaci_n_Retiros_Report/JPdZda7vkNjCJEanQ6P4x4eBB6m8BJKR4wfNXDSyz5q2qdn8nZdjdz0nFvaqYaegJ5qSmj8pnkNqTMTYwwhtwJW1XPR2ae2Vdmbe?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_+"&liquidacion_lp.Fecha_envio_a_pago=" + date + "&liquidacion_lp.Fecha_envio_a_pago_op=23"
+    df = pd.read_excel(URL)
+    df1 = pd.DataFrame(df)
+    # Traer información
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Report/y61kfuHKTXYbNdxVSYEXRbwZVPz5QEZ6fJTTqRzpy9Pa46eO6r30tTdTAJSdaUKHNZNSJxuBqQwkZ64e7OFND2HVFs0kTr8SjQOz?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_+"&liquidacion_lp.Fecha_envio_a_pago=" + date + "&liquidacion_lp.Fecha_envio_a_pago_op=23"            
+    df2 = pd.read_excel(URL)
+    df3 = pd.DataFrame(df2)
+# -----------------------------
+if(df1.empty and df3.empty):
     print("No existe registro")
 else:
     Documento_one = procesar(df1,df3)
-    print(Documento_one)
+    print(Documento_one)    

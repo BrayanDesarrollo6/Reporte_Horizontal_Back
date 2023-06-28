@@ -1,5 +1,3 @@
-from django.http import HttpResponse
-from django.shortcuts import render
 import pandas as pd
 from xlsxwriter import Workbook
 import numpy as np

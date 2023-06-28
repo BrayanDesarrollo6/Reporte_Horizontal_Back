@@ -28,4 +28,7 @@ router.get('/getEmpresasrelq', requestController.enviarEmpresasrelq)
 router.post('/procesarrelq', requestController.ReporteReLiquidacionResponse)
 router.get('/procesarrelq', requestController.ReporteReLiquidacionResponseDocument)
 
+//RUTA 6 - API sin frontexterno, directo zoho
+router.post('/api/v1/prenominaReporte', requestController.reportePrenomina)
+
 module.exports = router;

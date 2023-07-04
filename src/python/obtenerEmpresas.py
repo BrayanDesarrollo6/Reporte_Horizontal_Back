@@ -1,5 +1,3 @@
-from django.http import HttpResponse
-from django.shortcuts import render
 import pandas as pd
 from xlsxwriter import Workbook
 import numpy as np
@@ -8,6 +6,7 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
 import json
+from Directories.Directory import DirectoryObtenerEmpresasLQ, DirectoryObtenerEmpresasReLQ
 
 # Obtener si es para liquidacion o reliquidacion
 estado = sys.argv[1]
@@ -27,11 +26,11 @@ if(df1.empty == False):
     Estados = df1['Estado'].unique().tolist()
     File_Json["Estados"] = Estados
     if estado == "0":
-        with open("./src/database/VariablesEntornoLQ.json","w") as file:
+        with open(DirectoryObtenerEmpresasLQ,"w") as file:
             json.dump(File_Json, file, indent=4)
         print("VariablesEntornoLQ.json")    
     if estado == "1":
-        with open("./src/database/VariablesEntornoReLQ.json","w") as file:
+        with open(DirectoryObtenerEmpresasReLQ,"w") as file:
             json.dump(File_Json, file, indent=4)
         print("VariablesEntornoReLQ.json")
     

@@ -4,6 +4,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
+from ..Directories.Directory import DirectoryPlantillaTerceros
 
 def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total):
 
@@ -102,6 +103,6 @@ def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,
     for celda in rango_columna2:
         celda.fill = relleno_columna2
 
-    path = "./src/database/Terceros.xlsx"
+    path = DirectoryPlantillaTerceros
     wb.save(path)
     return path

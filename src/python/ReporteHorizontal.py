@@ -1,5 +1,3 @@
-from django.http import HttpResponse
-from django.shortcuts import render
 import pandas as pd
 from xlsxwriter import Workbook
 import numpy as np
@@ -7,8 +5,8 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
+from Directories.Directory import DirectoryReporteHorizontal
 
-# ------------------------------------------------------------------------------------------
 # reemplazar acentos
 def normalize(s):
     replacements = (
@@ -19,7 +17,6 @@ def normalize(s):
         s = s.replace(a, b).replace(a.upper(), b.upper())
     return s
 
-# ------------------------------------------------------------------------------------------
 # reemplazar caracteres
 def replacement(name_company):
     name_company = name_company.replace(".", "")
@@ -28,11 +25,10 @@ def replacement(name_company):
     name_company = name_company.replace("—", "_")
     return name_company
 
-# ------------------------------------------------------------------------------------------
 # Función secundaria 
 def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal):
-    # Fila agregar
     FilaAgregar = {}
+    
     ##Informacion general inicial
     FilaAgregar["Estado Nomina"] = ContratoPos.iloc[0]['Estado Nomina']
     FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
@@ -55,6 +51,7 @@ def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizo
     FilaAgregar["Salario Base"] = ContratoPos.iloc[0]['Salario Base']
     SumatoriaNetoDev = 0
     SumatoriaNetoDed = 0
+    
     #Ciclo para tomar informacion de los conceptos
     for elemento in ConceptosDev:
         de = ContratoPos["Concepto"] == str(elemento)
@@ -72,6 +69,7 @@ def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizo
             FilaAgregar[elemento + " / Unidades"] = Unidades
             FilaAgregar[elemento + " / Neto"] = Neto 
     FilaAgregar["Total Devengo"] = SumatoriaNetoDev
+    
     for elemento in ConceptosDed:
         de = ContratoPos["Concepto"] == str(elemento)
         Conce= ContratoPos[de]
@@ -106,17 +104,12 @@ def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizo
     Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
     return Horizontal  
 
-# ------------------------------------------------------------------------------------------
 # Funcion principal
 def procesar(df1, IdProceso):
-    
-    # Dataframe final
     Horizontal = pd.DataFrame()
-    # Datos generales
     Contrato  = df1['Numero de Contrato'].unique().tolist()
     IDPeriodo = df1['ID Periodo'].tolist()
     IDPeriodo = np.unique(IDPeriodo)
-    #Filtrar cada concepto unico que existe en ese reporte
     Conceptos = df1['Concepto'].unique().tolist()
     Conceptos.sort()
     ConceptosDev = []
@@ -124,7 +117,6 @@ def procesar(df1, IdProceso):
     for conceptosx in Conceptos:
         Valores = df1['Concepto'] == str(conceptosx)
         ContratoPos = df1[Valores]
-        #Sumatoria
         Total = ContratoPos['Neto'].sum()
         if(Total >= 0 ):
             ConceptosDev.append(conceptosx)
@@ -132,7 +124,6 @@ def procesar(df1, IdProceso):
             ConceptosDed.append(conceptosx)
     Conceptos.clear()
     Conceptos= ConceptosDev + ConceptosDed
-    #Se obtienen los datos dependiendo del empleado
 
     #Obtener información para agregar al nuevo data frame
     for j in IDPeriodo:
@@ -158,7 +149,6 @@ def procesar(df1, IdProceso):
     # Dataframe final para obtener los indices de las primeras columnas 
     Horizontal_heads_end = pd.DataFrame()
     Horizontal_heads_end = Horizontal
-            
     NombreDocumento = "Horizontal " + str(Horizontal.iloc[0]['Empresa']) +"-"+ str(Horizontal.iloc[0]['Mes'])+ "-" + str(Horizontal.iloc[0]['Tipo de Perido'])
     # Normalizar nombre del documento
     NombreDocumento = normalize(NombreDocumento)
@@ -173,7 +163,6 @@ def procesar(df1, IdProceso):
         if(Validador):
             Horizontal[k] = Horizontal[k].astype('float')
             FilaAgregar[k] = sum(Horizontal[k])
-        
     Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
 
     wb = Workbook()
@@ -185,10 +174,8 @@ def procesar(df1, IdProceso):
     ws.insert_rows(1)
     ws.insert_rows(1)
     ws.insert_rows(1)
-    
     Horizontal = pd.DataFrame(ws.values)
-    
-    writer = pd.ExcelWriter("./src/database/"+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(DirectoryReporteHorizontal+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]
@@ -196,22 +183,20 @@ def procesar(df1, IdProceso):
     format.set_pattern(1)
     format.set_bg_color('#AFAFAF')
     format.set_bold(True) 
-        
     worksheet.write_string(1, 1, str(Horizontal_heads_end.iloc[0]['Temporal']),format)
     worksheet.write_string(1, 2,str(Horizontal_heads_end.iloc[0]['Empresa']),format)
     worksheet.write_string(1, 3,str(Horizontal_heads_end.iloc[0]['ID Periodo']),format)
     worksheet.write_string(1, 4,str(Horizontal_heads_end.iloc[0]['Tipo de Perido']),format)
     worksheet.write_string(1, 5,str(Horizontal_heads_end.iloc[0]['Mes']),format)
-    
     contador = 0
     MaxFilas = len(Horizontal.axes[0])
     Totales = Horizontal.loc[MaxFilas -1]
+    
     for k in heads:
-        
         worksheet.write_string(3, contador,str(k),format)
-        contador += 1
-        
+        contador += 1    
     contador = 0
+    
     for k in Totales:
         Dato = ""
         if(str(k) != "nan"):
@@ -222,9 +207,7 @@ def procesar(df1, IdProceso):
     writer.close()
     return NombreDocumento+".xlsx"
 
-# ------------------------------------------------------------------------------------------
 # Validar que tenga contenido los ID 
-
 def validar_contenido_id():  
     if(estado == '1'):
         IdProceso = sys.argv[2]
@@ -241,8 +224,6 @@ def validar_contenido_id():
         IdPeriodo2 = sys.argv[4]
         IdPeriodo3 = sys.argv[5]
         IdPeriodo = '['+IdPeriodo1+','+IdPeriodo2+','+IdPeriodo3+']'
-
-    #Traer información
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo
     # url_ = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prenomina/WWjRAOJ2MGyyNGd5BxdvwApYGzgq5A9AQ5Q6bUmpsTQvWTMJE4qE5MyKnY4KKPXneurq8RnTZ2O698AO8N2KQ7Fa7qt4hpwSet0K?Periodo=" + _idPeriodo + "&zc_FileName=PreNomina_" + _idPeriodo;
     df = pd.read_excel(URL)
@@ -253,14 +234,12 @@ def validar_contenido_id():
         Documento_one = procesar(df1, IdProceso)
         print(Documento_one)
       
-# ------------------------------------------------------------------------------------------
 # Si llegó mas de un ID primero válide la empresa usuaria
 def validar_empresa():
     if(estado == '2'):
         IdProceso = sys.argv[2]
         IdPeriodo1 = sys.argv[3]
         IdPeriodo2 = sys.argv[4]
-        #Traer información
         URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo1
         URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo2
         dataf = pd.read_excel(URL)
@@ -291,7 +270,6 @@ def validar_empresa():
         IdPeriodo1 = sys.argv[3]
         IdPeriodo2 = sys.argv[4]
         IdPeriodo3 = sys.argv[5]
-        #Traer información
         URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo1
         URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo2
         URL3 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_Nomina_Desarrollo/jwhRFUOR47TqCS9AAT82eCybwgdmgeArEtKG7U8H9s3hSjTzBd3G8bPdg37PHVygvxurxwCQvMCgHRG68dOCWKTmMWaQJU2TMwnr?ID_Periodo="+IdPeriodo3
@@ -328,7 +306,6 @@ def validar_empresa():
                 Documento_three = procesar(dataf3,IdProceso)
                 print(Documento_one + ',' + Documento_two + ',' + Documento_three)
 
-# ------------------------------------------------------------------------------------------
 # validar cuantos ID llegaron 1 o más
 def estados():
     if(estado == '1'):
@@ -336,7 +313,6 @@ def estados():
     else:
         validar_empresa()
     
-# ------------------------------------------------------------------------------------------
 # Inicio del programa 
 global estado
 estado = sys.argv[1]

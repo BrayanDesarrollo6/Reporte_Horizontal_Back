@@ -1,5 +1,3 @@
-from django.http import HttpResponse
-from django.shortcuts import render
 import pandas as pd
 from xlsxwriter import Workbook
 import numpy as np
@@ -7,6 +5,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
+from Directories.Directory import DirectoryReporteReLiquidaciones
 
 # reemplazar acentos
 def normalize(s):
@@ -53,7 +52,7 @@ def procesar(df,df3):
     for j in IDLiquidacion:
         Valores = df3['Id Proceso'] == j
         ContratoPos = df3[Valores]
-        #CONCEPTOS DE LIQUIDACION DEL EMPLEADO
+        # CONCEPTOS DE LIQUIDACION DEL EMPLEADO
         Valores = df['Id Proceso'] == j
         ContratoPosLiqui = df[Valores]
         if ContratoPos.empty == False:
@@ -78,6 +77,7 @@ def procesar(df,df3):
             SumatoriaNetoDed = 0
             # Ciclo para tomar informacion de los conceptos
             if df.empty == False:
+                
                 for elemento in ConceptosDev:
                     de = ContratoPosLiqui["Concepto"] == str(elemento)
                     Conce= ContratoPosLiqui[de]
@@ -94,6 +94,7 @@ def procesar(df,df3):
                         FilaAgregar[elemento + " / Unidades"] = Unidades
                         FilaAgregar[elemento + " / Neto"] = Neto 
                 FilaAgregar["Total Devengo"] = SumatoriaNetoDev
+                
                 for elemento in ConceptosDed:
                     de = ContratoPosLiqui["Concepto"] == str(elemento)
                     Conce= ContratoPosLiqui[de]
@@ -117,6 +118,7 @@ def procesar(df,df3):
                 Valores = df3['Id Proceso'] == j
                 ConceptosPrestaciones = df3[Valores]
                 Conceptos = df3['Concepto'].unique().tolist()
+                
                 for elemento in Conceptos:
                     de = ConceptosPrestaciones["Concepto"] == str(elemento)
                     Conce= ConceptosPrestaciones[de]
@@ -133,7 +135,7 @@ def procesar(df,df3):
                         FilaAgregar[str(elemento) + " / Unidades"] = Unidades
                         FilaAgregar[str(elemento) + " / Neto"] = Neto
                 FilaAgregar["Subtotal a pagar prestaciones"] = SumatoriaNetoprestaciones
-            
+                
                 # INDEMNIZACION
                 if(ContratoPosLiqui.empty == False):
                     FilaAgregar["Indemnización / Neto"] = ContratoPosLiqui.iloc[0]['Sub Total Neto indemnizacion']
@@ -143,14 +145,13 @@ def procesar(df,df3):
                 else:
                     FilaAgregar["Indemnización / Neto"] = 0
                     FilaAgregar["Neto a pagar"] = 0
-            
             Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
 
     # Dataframe final para obtener los indices de las primeras columnas 
     Horizontal_heads_end = pd.DataFrame()
     Horizontal_heads_end = Horizontal
-    
     NombreDocumento = "Horizontal_ReLiquidaciones_" + Horizontal.iloc[0]['Empresa']
+    
     # Normalizar nombre del documento
     NombreDocumento = normalize(NombreDocumento)
     NombreDocumento = replacement(NombreDocumento)
@@ -178,53 +179,47 @@ def procesar(df,df3):
     ws.insert_rows(1)
     
     Horizontal = pd.DataFrame(ws.values)
-    
-    writer = pd.ExcelWriter("./src/database/"+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(DirectoryReporteReLiquidaciones+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]
     format = workbook.add_format()
     format.set_pattern(1)
     format.set_bg_color('#AFAFAF')
-    format.set_bold(True) 
-        
+    format.set_bold(True)         
     worksheet.write_string(1, 1, str(Horizontal_heads_end.iloc[0]['Temporal']),format)
     worksheet.write_string(1, 2,str(Horizontal_heads_end.iloc[0]['Empresa']),format)
-    
     contador = 0
     MaxFilas = len(Horizontal.axes[0])
     Totales = Horizontal.loc[MaxFilas -1]
+    
     for k in heads:
-        
         worksheet.write_string(3, contador,str(k),format)
         contador += 1
-        
     contador = 0
+    
     for k in Totales:
         Dato = ""
         if(str(k) != "nan"):
             Dato = str(k)
         worksheet.write_string(MaxFilas-1, contador,Dato ,format)
-        contador += 1
-        
+        contador += 1    
     writer.close()
+    
     return NombreDocumento+".xlsx"
     
-# -----------------------------
 Empresa = sys.argv[1]
 Estado = sys.argv[2]
 Anio = sys.argv[3]
 Mes = sys.argv[4]
-# -----------------------------
+
 Empresa_ = Empresa.replace(" ", "%20")
 Estado_ = Estado.replace(" ","%20")
-# -----------------------------
+
 if(Anio == "undefined" or Mes == "undefined"):    
-    # RECORRER LAS PRESTACIONES SOCIALES
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    # Traer información
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
     df2 = pd.read_excel(URL)
     df3 = pd.DataFrame(df2)
@@ -233,11 +228,10 @@ else:
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    # Traer información
     RL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"            
     df2 = pd.read_excel(URL)
     df3 = pd.DataFrame(df2)
-# -----------------------------
+
 if(df1.empty and df3.empty):
     print("No existe registro")
 else:

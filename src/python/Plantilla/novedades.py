@@ -4,7 +4,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
-from ..Directories.Directory import DirectoryPlantillaNovedades
+from Directories.Directory import DirectoryPlantillaNovedades
 
 def novedades(d_temporal,d_cliente,d_empleados,d_periodo,d_concepto,d_valor,d_unidades):
 

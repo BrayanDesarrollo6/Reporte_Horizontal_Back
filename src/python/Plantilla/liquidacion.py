@@ -4,7 +4,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
-from ..Directories.Directory import DirectoryPlantillaLiquidacion
+from Directories.Directory import DirectoryPlantillaLiquidacion
 
 def liquidacion(d_temporal,d_cliente,d_empleados,d_periodo,d_concepto,d_valor,d_unidades,d_id_temporal,d_id_cliente,d_id_concepto,d_id_periodo):
     

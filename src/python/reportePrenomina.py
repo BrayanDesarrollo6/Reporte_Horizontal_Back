@@ -11,7 +11,6 @@ from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl import load_workbook
 import sys
-import cv2
 
 # reemplazar acentos
 def normalize(s):
@@ -30,6 +29,7 @@ def replacement(name_company):
     name_company = name_company.replace("–", "_")
     name_company = name_company.replace("—", "_")
     return name_company
+
 def AccesToken():
     refresh_ = '1000.33a5526ca066d526ee93e1d4eac2c002.c2707bc77a9bb1cfcb29e590da4581b8'
     url = 'https://accounts.zoho.com/oauth/v2/token?refresh_token=' + refresh_ + '&client_id=1000.1X8CFKQHNVMIQYBM2LD5D630UAMMXB&client_secret=ed77d9ad812478a75cb46e11db1bbc262b8f1d49bf&grant_type=refresh_token'
@@ -51,6 +51,7 @@ def AccesToken():
         posts = resp.json()
         token = posts['access_token']
     return token
+
 def procesar(Horizontal):
     # Dataframe final para obtener los indices de las primeras columnas 
     global Empresa_
@@ -88,7 +89,6 @@ def procesar(Horizontal):
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False , startrow = 4)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]
-    
     format = workbook.add_format()
     format.set_pattern(1)
     format.set_bg_color('#FF2828')
@@ -100,25 +100,25 @@ def procesar(Horizontal):
     worksheet.write_string(1, 1, str(Horizontal_heads_end.iloc[0]['Temporal']),format)
     worksheet.write_string(2, 1,str(Horizontal_heads_end.iloc[0]['Empresa']),format)
     worksheet.write_string(3, 1,str(Horizontal_heads_end.iloc[0]['Periodo']),format)
-    
     contador = 0
     MaxFilas = len(Horizontal.axes[0])
     Totales = Horizontal.loc[MaxFilas -1]
-    for k in heads:
-        
+    
+    for k in heads:    
         worksheet.write_string(3, contador,str(k),format)
         contador += 1
-        
     contador = 0
+    
     for k in Totales:
         Dato = ""
         if(str(k) != "nan"):
             Dato = str(k)
         # worksheet.write_string(MaxFilas-1, contador,Dato ,format)
-        contador += 1
+        contador += 1    
         
     writer.close()
     insertarDocumento()
+    
 def insertarDocumento():
     global IDregistro_,Empresa_
     # Llamar API de zoho para actualizar datos del consecutivo
@@ -141,21 +141,17 @@ def insertarDocumento():
         url_ = "https://creator.zoho.com/api/v2/hq5colombia/compensacionhq5/form/templatesVarios"
         header = {"Authorization":"Zoho-oauthtoken "+Token_, "Access-Control-Allow-Origin": "*"} 
         r = requests.post(url_,data=Datos_,headers=header)
-        
     
-    
-    
-# -----------------------------
 global IDregistro_,Periodo
 Periodo = sys.argv[1]
 IDregistro_ = sys.argv[2]
+
 # RECORRER LAS PRESTACIONES SOCIALES
 URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prenomina/WWjRAOJ2MGyyNGd5BxdvwApYGzgq5A9AQ5Q6bUmpsTQvWTMJE4qE5MyKnY4KKPXneurq8RnTZ2O698AO8N2KQ7Fa7qt4hpwSet0K?Periodo=" + Periodo
 df = pd.read_excel(URL)
 df1 = pd.DataFrame(df)
-if(df1.empty and df3.empty):
+if(df1.empty):
     print("No existe registro")
 else:
     procesar(df1)
-    # Documento_one = procesar(df1,df3)
     # print(Documento_one)   

@@ -281,23 +281,25 @@ requestsController.ReporteReLiquidacionResponseDocument = (req, res) => {
     res.download(DescargaReporteReLiquidaciones+Nombre_Horizontal); 
     setTimeout(() => {fs.unlinkSync(DescargaReporteReLiquidaciones+Nombre_Horizontal);}, "100")
 }
-//Funcion para generar el archivo de prenomina
-requestsController.reportePrenomina = (req, res) => {
-    let data_1 = req.body.Data.periodo;
-    let data_2 = req.body.Data.idregistro;
 
-    const process = spawn('python',["./src/python/reportePrenomina.py",data_1,data_2]);
-    process.stderr.on("data",(data)=>{
-        console.error('stderr:',data.toString());
-    })
-    process.stdout.on('data', (data) => {
-        Nombre_Horizontal = data.toString();
-        Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
-        Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
-        console.log(Nombre_Horizontal);
-        if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
-        else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
-    });
-}
+//Funcion para generar el archivo de prenomina
+// requestsController.reportePrenomina = (req, res) => {
+//     let data_1 = req.body.Data.periodo;
+//     let data_2 = req.body.Data.idregistro;
+
+//     const process = spawn('python',["./src/python/reportePrenomina.py",data_1,data_2]);
+//     process.stderr.on("data",(data)=>{
+//         console.error('stderr:',data.toString());
+//     })
+//     process.stdout.on('data', (data) => {
+//         Nombre_Horizontal = data.toString();
+//         Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
+//         Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
+//         console.log(Nombre_Horizontal);
+//         if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
+//         else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
+//     });
+// }
+
 // Exportar módulo
 module.exports = requestsController;

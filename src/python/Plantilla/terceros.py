@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from Directories.Directory import DirectoryPlantillaTerceros
 
-def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total):
+def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_id_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total):
 
     d_temporal = d_temporal.replace(" ", "%20")
     d_cliente = d_cliente.replace(" ", "%20")
@@ -26,16 +26,17 @@ def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,
     rows = []
     for i in range(len(df)):
         FilaAgregar = {
-            "Documento": int(df.iloc[i]['Numero de Documento']),
-            "Contrato": int(df.iloc[i]['N° de Contrato']),
-            "Nombre Concepto": str(d_concepto),
+            "Documento": int(df.iloc[i]['ID System']),
+            "Contrato": int(df.iloc[i]['ID System']),
+            "Nombre Concepto": str(d_id_concepto),
             "Tipo": str(d_tipo),
             "Modo de pago": str(d_modo_pago),
             "Valor Total": float(d_valor),
             "Fecha de inicio": str(d_fecha),
             "Cuando se realiza el descuento": str(d_realizacion_descuento),
             "Número de cuotas": int(d_n_cuotas),
-            "Estado descuento total": str(d_estado_des_total)
+            "Estado descuento total": str(d_estado_des_total),
+            "Informacion": str(df.iloc[i]['Numero de Documento']) + " - " + str(df.iloc[i]['Nombre Completo']) + " - " + str(df.iloc[i]['N° de Contrato']) + " - " + str(df.iloc[i]['Estado Trabajador'])
         }
         rows.append(FilaAgregar)
 
@@ -94,14 +95,19 @@ def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,
 
     relleno_columna1 = PatternFill(start_color='8ECD82', end_color='8ECD82', fill_type='solid')
     relleno_columna2 = PatternFill(start_color='8ECD82', end_color='8ECD82', fill_type='solid')
+    relleno_columna3 = PatternFill(start_color='8ECD82', end_color='8ECD82', fill_type='solid')
     rango_columna1 = ws['E:E']
     rango_columna2 = ws['J:J']
+    rango_columna3 = ws['K:K']
 
     for celda in rango_columna1:
         celda.fill = relleno_columna1
 
     for celda in rango_columna2:
         celda.fill = relleno_columna2
+        
+    for celda in rango_columna3:
+        celda.fill = relleno_columna3
 
     path = DirectoryPlantillaTerceros
     wb.save(path)

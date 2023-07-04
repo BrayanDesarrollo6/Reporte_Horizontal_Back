@@ -26,8 +26,8 @@ def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_id_concepto,d_fecha,d
     rows = []
     for i in range(len(df)):
         FilaAgregar = {
-            "Documento": int(df.iloc[i]['ID System']),
-            "Contrato": int(df.iloc[i]['ID System']),
+            "Documento": str(df.iloc[i]['ID System']),
+            "Contrato": str(df.iloc[i]['ID System']),
             "Nombre Concepto": str(d_id_concepto),
             "Tipo": str(d_tipo),
             "Modo de pago": str(d_modo_pago),

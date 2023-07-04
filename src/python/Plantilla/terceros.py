@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from Directories.Directory import DirectoryPlantillaTerceros
 
-def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total):
+def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_id_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total):
 
     d_temporal = d_temporal.replace(" ", "%20")
     d_cliente = d_cliente.replace(" ", "%20")
@@ -26,9 +26,9 @@ def terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,
     rows = []
     for i in range(len(df)):
         FilaAgregar = {
-            "Numero documento": int(df.iloc[i]['Numero de Documento']),
-            "ID contrato": int(df.iloc[i]['N° de Contrato']),
-            "Nombre concepto": str(d_concepto),
+            "Numero documento": int(df.iloc[i]['Numero de Documento']) + " - " + int(df.iloc[i]['N° de Contrato']),
+            "ID contrato": str(df.iloc[i]['N° de Contrato']),
+            "Nombre concepto": str(d_concepto) + " - " + str(d_id_concepto),
             "Tipo": str(d_tipo),
             "Modo de pago": str(d_modo_pago),
             "Valor": float(d_valor),

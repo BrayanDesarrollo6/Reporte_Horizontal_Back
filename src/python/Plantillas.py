@@ -29,7 +29,7 @@ def controlador():
         d_modo_pago = "Pago nomina"
         d_estado_des_total = "Sin calcular"
         
-        file_path = terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total)
+        file_path = terceros(d_temporal,d_cliente,d_empleados,d_concepto,d_id_concepto,d_fecha,d_tipo,d_valor,d_realizacion_descuento,d_n_cuotas,d_modo_pago,d_estado_des_total)
         access_token = obtener_access_token()
         
         if access_token:

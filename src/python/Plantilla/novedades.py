@@ -28,11 +28,11 @@ def novedades(d_temporal,d_cliente,d_empleados,d_periodo,d_concepto,d_valor,d_un
         FilaAgregar = {
             "Empresa": str(df.iloc[i]['Código del cliente']) + " - " + str(df.iloc[i]['Empresa']),
             "Periodo": int(d_periodo),
-            "Documento": str(df.iloc[i]['ID System']),
-            "Contrato": str(df.iloc[i]['ID System']),
-            "Unidades hora": int(d_unidades),
+            "Numero de Documento": str(df.iloc[i]['ID System']),
+            "Numero de Contrato": str(df.iloc[i]['ID System']),
+            "Hora": int(d_unidades),
             "Valor": float(d_valor),
-            "Nombre Concepto": str(d_concepto),
+            "Concepto": str(d_concepto),
             "Informacion": str(df.iloc[i]['Numero de Documento']) + " - " + str(df.iloc[i]['Nombre Completo']) + " - " + str(df.iloc[i]['N° de Contrato']) + " - " + str(df.iloc[i]['Estado Trabajador'])
         }
         rows.append(FilaAgregar)

@@ -27,10 +27,10 @@ def liquidacion(d_temporal,d_cliente,d_empleados,d_periodo,d_concepto,d_valor,d_
     for i in range(len(df)):
         FilaAgregar = {
             "Empresa": str(d_id_cliente),
-            "Nombre Concepto": str(d_id_concepto),
-            "Documento": str(df.iloc[i]['ID System']),
-            "Contrato": str(df.iloc[i]['ID System']),
-            "Unidades hora": int(d_unidades),
+            "Concepto": str(d_id_concepto),
+            "Numero de Documento": str(df.iloc[i]['ID System']),
+            "Numero de Contrato": str(df.iloc[i]['ID System']),
+            "Unidades": int(d_unidades),
             "Valor": float(d_valor),
             "Informacion": str(df.iloc[i]['Numero de Documento']) + " - " + str(df.iloc[i]['Nombre Completo']) + " - " + str(df.iloc[i]['N° de Contrato']) + " - " + str(df.iloc[i]['Estado Trabajador'])
         }

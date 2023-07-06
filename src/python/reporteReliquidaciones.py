@@ -5,6 +5,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
+from Directories.Directory import DirectoryReporteReLiquidaciones
 
 # reemplazar acentos
 def normalize(s):
@@ -177,7 +178,7 @@ def procesar(df1,df3):
     ws.insert_rows(1)
     
     Horizontal = pd.DataFrame(ws.values)
-    writer = pd.ExcelWriter("./"+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(DirectoryReporteReLiquidaciones+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]

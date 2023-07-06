@@ -5,7 +5,6 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
-from Directories.Directory import DirectoryReporteReLiquidaciones
 
 # reemplazar acentos
 def normalize(s):
@@ -25,21 +24,21 @@ def replacement(name_company):
     name_company = name_company.replace("—", "_")
     return name_company
 
-def procesar(df,df3):
+def procesar(df1,df3):
     # Dataframe final
     Horizontal = pd.DataFrame()
     Contrato = df3['Numero de Contrato'].unique().tolist()
-    IDLiquidacion = df3['Id Proceso'].tolist()
+    IDLiquidacion = df3['Id Proceso'].unique().tolist()
     IDLiquidacion = np.unique(IDLiquidacion)
     # Filtrar cada concepto unico que existe en ese reporte
-    if df.empty == False:
-        Conceptos = df['Concepto'].unique().tolist()
+    if df1.empty == False:
+        Conceptos = df1['Concepto'].unique().tolist()
         Conceptos.sort()
         ConceptosDev = []
         ConceptosDed = []
         for conceptosx in Conceptos:
-            Valores = df['Concepto'] == str(conceptosx)
-            ContratoPos2 = df[Valores]
+            Valores = df1['Concepto'] == str(conceptosx)
+            ContratoPos2 = df1[Valores]
             # Sumatoria
             Total = ContratoPos2['Neto'].sum()
             if(Total >= 0 ):
@@ -48,13 +47,13 @@ def procesar(df,df3):
                 ConceptosDed.append(conceptosx)
         Conceptos.clear()
         Conceptos = ConceptosDev + ConceptosDed
-    
+
     for j in IDLiquidacion:
         Valores = df3['Id Proceso'] == j
         ContratoPos = df3[Valores]
         # CONCEPTOS DE LIQUIDACION DEL EMPLEADO
-        Valores = df['Id Proceso'] == j
-        ContratoPosLiqui = df[Valores]
+        Valores = df1['Id Proceso'] == j
+        ContratoPosLiqui = df1[Valores]
         if ContratoPos.empty == False:
             FilaAgregar = {}
             SumatoriaNetoprestaciones = 0
@@ -76,8 +75,7 @@ def procesar(df,df3):
             SumatoriaNetoDev = 0
             SumatoriaNetoDed = 0
             # Ciclo para tomar informacion de los conceptos
-            if df.empty == False:
-                
+            if df1.empty == False:          
                 for elemento in ConceptosDev:
                     de = ContratoPosLiqui["Concepto"] == str(elemento)
                     Conce= ContratoPosLiqui[de]
@@ -114,7 +112,7 @@ def procesar(df,df3):
                 FilaAgregar["Subtotal a pagar"] = SumatoriaNetoDev - abs(SumatoriaNetoDed)
                 Subtotal = SumatoriaNetoDev - abs(SumatoriaNetoDed)
                 
-            if(df3.empty == False):
+            if df3.empty == False:
                 Valores = df3['Id Proceso'] == j
                 ConceptosPrestaciones = df3[Valores]
                 Conceptos = df3['Concepto'].unique().tolist()
@@ -179,7 +177,7 @@ def procesar(df,df3):
     ws.insert_rows(1)
     
     Horizontal = pd.DataFrame(ws.values)
-    writer = pd.ExcelWriter(DirectoryReporteReLiquidaciones+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter("./"+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]
@@ -220,16 +218,16 @@ if(Anio == "undefined" or Mes == "undefined"):
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
-    df2 = pd.read_excel(URL)
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
+    df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
 else:
     date = Anio + "-" + Mes + "-01"
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    RL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"            
-    df2 = pd.read_excel(URL)
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"            
+    df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
 
 if(df1.empty and df3.empty):

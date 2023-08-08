@@ -22,8 +22,12 @@ df1 = pd.DataFrame(df)
 if(df1.empty == False):
     File_Json = {}
     Empresas = df1['Empresa Usuaria'].unique().tolist()
+    Empresas = [str(x) for x in Empresas]
+    Empresas = [x for x in Empresas if x != 'NaN']
     File_Json["Empresas"] = Empresas
     Estados = df1['Estado'].unique().tolist()
+    Estados = [str(x) for x in Estados]
+    Estados = [x for x in Estados if x != 'NaN']
     File_Json["Estados"] = Estados
     if estado == "0":
         with open(DirectoryObtenerEmpresasLQ,"w") as file:

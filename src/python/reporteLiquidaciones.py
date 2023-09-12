@@ -212,8 +212,8 @@ Estado = sys.argv[2]
 Anio = sys.argv[3]
 Mes = sys.argv[4]
 
-Empresa_ = urllib.parse.quote(Empresa_)
-Estado_ = urllib.parse.quote(Estado_)
+Empresa_ = urllib.parse.quote(Empresa)
+Estado_ = urllib.parse.quote(Estado)
 
 if(Anio == "undefined" and Mes == "undefined"):    
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Liquidaci_n_Retiros_Report/JPdZda7vkNjCJEanQ6P4x4eBB6m8BJKR4wfNXDSyz5q2qdn8nZdjdz0nFvaqYaegJ5qSmj8pnkNqTMTYwwhtwJW1XPR2ae2Vdmbe?liquidacion_lp.Empresa_Usuaria="+Empresa_+"&liquidacion_lp.Estado="+Estado_

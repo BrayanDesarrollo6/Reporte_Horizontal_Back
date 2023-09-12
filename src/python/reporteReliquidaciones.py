@@ -5,6 +5,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
+import urllib.parse
 from Directories.Directory import DirectoryReporteReLiquidaciones
 
 # reemplazar acentos
@@ -212,8 +213,8 @@ Estado = sys.argv[2]
 Anio = sys.argv[3]
 Mes = sys.argv[4]
 
-Empresa_ = Empresa.replace(" ", "%20")
-Estado_ = Estado.replace(" ","%20")
+Empresa_ = urllib.parse.quote(Empresa)
+Estado_ = urllib.parse.quote(Estado)
 
 if(Anio == "undefined" or Mes == "undefined"):    
     URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_

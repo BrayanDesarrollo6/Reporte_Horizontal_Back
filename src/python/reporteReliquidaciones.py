@@ -6,6 +6,8 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
 import urllib.parse
+from datetime import datetime
+import calendar
 from Directories.Directory import DirectoryReporteReLiquidaciones
 
 # reemplazar acentos
@@ -216,24 +218,42 @@ Mes = sys.argv[4]
 Empresa_ = urllib.parse.quote(Empresa)
 Estado_ = urllib.parse.quote(Estado)
 
-if(Anio == "undefined" or Mes == "undefined"):    
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
+if(Anio in (None, "undefined", "") and Mes in (None, "undefined", "")):    
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"
     df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
-else:
-    date = Anio + "-" + Mes + "-01"
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"
+    
+elif(Anio not in (None, "undefined", "") and Mes in (None, "undefined", "")):
+    date = Anio + "-01-01"
+    fecha = datetime.strptime(date, "%Y-%m-%d")
+    ultimo_dia_anio = datetime(fecha.year, 12, 31).date()
+    date2 = str(ultimo_dia_anio)
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado="+Estado_+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + "&reliquidacion_lp.Fecha_envio_a_pago_op=23"            
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    df2 = pd.read_excel(URL2)
+    df3 = pd.DataFrame(df2)
+    
+else:
+    date = Anio + "-" + Mes + "-01"
+    fecha = datetime.strptime(date, "%Y-%m-%d")
+    ultimo_dia = calendar.monthrange(fecha.year, fecha.month)[1]
+    fecha_ultimo_dia = fecha.replace(day=ultimo_dia).date()
+    date2 = str(fecha_ultimo_dia)
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    df = pd.read_excel(URL)
+    df1 = pd.DataFrame(df)
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
     df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
 
 if(df1.empty and df3.empty):
     print("No existe registro")
+    
 else:
     Documento_one = procesar(df1,df3)
     print(Documento_one)    

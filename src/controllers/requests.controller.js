@@ -268,9 +268,9 @@ requestsController.ReporteReLiquidacionResponse = (req, res) => {
     })
     process.stdout.on('data', (data) => {
         Nombre_Horizontal = data.toString();
+        console.log(Nombre_Horizontal);
         Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
         Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
-        console.log(Nombre_Horizontal);
         if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
         else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
     });

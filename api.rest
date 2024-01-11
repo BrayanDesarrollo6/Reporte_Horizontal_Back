@@ -63,3 +63,51 @@ POST https://backcompensaciones.gestionhq5.com.co/certificadoaportes
 ###
 GET http://localhost:4001/plantilla
 
+###
+POST http://localhost:4001/api/v1/formatoOrdenIngreso
+content-type: application/json
+
+{
+  "data": {
+    "ID_generado": "3960020000098096952",
+    "formato": {
+      "nombre": "orden_ingreso"
+    },
+    "requisicion": {
+      "proveedor_servicios": "HQ5 S.A.S",
+      "cliente": "ABC LTDA (EMPRESA DE PRUEBA)",
+      "cargo": "DESARROLLADOR",
+      "ciudad": "BOGOTA, D.C.",
+      "horario": "De Lunes a Jueves de 08:00:00 AM a 06:00:00 PM, Viernes de 09:00:00 AM a 06:00:00 PM y Sabado de 10:00:00 AM a 01:00:00 PM",
+      "salario": 1750000
+    },
+    "orden_ingreso": {
+      "nivel_riesgo": "2.436",
+      "sitio_presentacion": "Aca",
+      "sitio_trabajo": "test",
+      "fecha_ingreso": "10/01/2024",
+      "centro_costo": "CENTER ONLY CALI"
+    },
+    "beneficios_prestacionales": [],
+    "beneficios_no_prestacionales": [
+      {
+        "grupo": "Subsidio Legal",
+        "concepto": "Subsidio de Transporte Legal",
+        "valor": 162000
+      }
+    ],
+    "documentos_especiales": "",
+    "postulados": [
+      {
+        "tipo_doc": "CARNE DIPLOMATICO",
+        "numero_doc": "555555",
+        "nombre": "TEST TEST TEST TEST"
+      },
+      {
+        "tipo_doc": "CEDULA DE CIUDADANIA",
+        "numero_doc": "5555555555",
+        "nombre": "TEST TEST TEST 2 TEST"
+      }
+    ]
+  }
+}

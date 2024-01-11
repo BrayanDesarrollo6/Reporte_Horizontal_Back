@@ -11,6 +11,28 @@ var Nombre_Horizontal = "";
 var Lista_nombres = [];
 // Constantes Archivo TxtSS
 var Nombre_txt = "";
+/*
+// Directories Horizontal
+PythonReporteHorizontal = "./python/ReporteHorizontal.py";
+DescargaReporteHorizontal = './database/';
+// Directories Txt
+PythonReporteTxt = "./python/TXTSS.py";
+DescargaReporteTxt = './database/';
+// Directories Plantillas
+PythonPlantillasHorizontal = "./python/Plantillas.py";
+PythonObtenerEmpresas = "./python/obtenerEmpresas.py";
+// Directories Json
+DescargaJsonLiquidaciones = "./database/VariablesEntornoLQ.json";
+DescargaJsonReLiquidaciones = "./database/VariablesEntornoReLQ.json";
+// Directories Liquidaciones
+PythonReporteLiquidaciones = "./python/reporteLiquidaciones.py";
+DescargaReporteLiquidaciones = './database/';
+// Directories ReLiquidaciones
+PythonReporteReLiquidaciones = "./python/reporteReliquidaciones.py";
+DescargaReporteReLiquidaciones = './database/';
+// Directories formatoOrdenIngreso
+PythonFormatos = "./python/formatos.py"
+*/
 // Directories Horizontal
 PythonReporteHorizontal = "./src/python/ReporteHorizontal.py";
 DescargaReporteHorizontal = './src/database/';
@@ -29,6 +51,8 @@ DescargaReporteLiquidaciones = './src/database/';
 // Directories ReLiquidaciones
 PythonReporteReLiquidaciones = "./src/python/reporteReliquidaciones.py";
 DescargaReporteReLiquidaciones = './src/database/';
+// Directories formatoOrdenIngreso
+PythonFormatos = "./src/python/formatos.py"
 
 // Reporte Horizontal
 requestsController.ReporteHorizontalResponse = (req, res) => {
@@ -82,31 +106,20 @@ requestsController.ReporteHorizontalResponse = (req, res) => {
     }
 };
 
-// Funcion de leer excel
-function leerexcel(Lista_nombre){
-    const workBook = XLSX.readFile('./src/database/'+Lista_nombre);
-    const workbooksheet = workBook.SheetNames;
-    const sheet = workbooksheet[0];
-    const dataExcel = XLSX.utils.sheet_to_json(workBook.Sheets[sheet]);
-}
-
 // Función descargar Archivo reporte horizontal
 requestsController.ReporteHorizontalResponseDocument = (req, res) => {
-    // leerexcel(Lista_nombres[0]);
     res.download(DescargaReporteHorizontal+Lista_nombres[0]); 
     setTimeout(() => {fs.unlinkSync(DescargaReporteHorizontal+Lista_nombres[0]);},"100")
 }
 
 // Función descargar Archivo reporte horizontal 2
 requestsController.ReporteHorizontalResponseDocument2 = (req, res) => {
-    // leerexcel(Lista_nombres[1]);
     res.download(DescargaReporteHorizontal+Lista_nombres[1]); 
     setTimeout(() => {fs.unlinkSync(DescargaReporteHorizontal+Lista_nombres[1]);},"100")
 }
 
 // Función descargar Archivo reporte horizontal 3
 requestsController.ReporteHorizontalResponseDocument3 = (req, res) => {
-    // leerexcel(Lista_nombres[2]);
     res.download(DescargaReporteHorizontal+Lista_nombres[2]); 
     setTimeout(() => {fs.unlinkSync(DescargaReporteHorizontal+Lista_nombres[2]);},"100")
 }
@@ -282,24 +295,34 @@ requestsController.ReporteReLiquidacionResponseDocument = (req, res) => {
     setTimeout(() => {fs.unlinkSync(DescargaReporteReLiquidaciones+Nombre_Horizontal);}, "100")
 }
 
-//Funcion para generar el archivo de prenomina
-// requestsController.reportePrenomina = (req, res) => {
-//     let data_1 = req.body.Data.periodo;
-//     let data_2 = req.body.Data.idregistro;
-
-//     const process = spawn('python',["./src/python/reportePrenomina.py",data_1,data_2]);
-//     process.stderr.on("data",(data)=>{
-//         console.error('stderr:',data.toString());
-//     })
-//     process.stdout.on('data', (data) => {
-//         Nombre_Horizontal = data.toString();
-//         Nombre_Horizontal = Nombre_Horizontal.split("\r\n").join("");
-//         Nombre_Horizontal = Nombre_Horizontal.split("\n").join("");
-//         console.log(Nombre_Horizontal);
-//         if(Nombre_Horizontal == "No existe registro"){res.json({process: '0', result: 'No hay registro'});}
-//         else{process.stdout.on('end', function(data) {res.json({process: '1', result: Nombre_Horizontal});})}
-//     });
-// }
+//Funcion para generar el archivo de formato orden ingreso
+requestsController.formatoOrdenIngreso = (req, res) => {
+    const { body } = req;
+    const jsonString = JSON.stringify(body);
+    // Condicionales
+    if(jsonString != "")
+    {
+        const process = spawn('python',[PythonFormatos,jsonString]);
+        process.stderr.on("data",(data)=>{
+            console.error('stderr:',data.toString());
+        })
+        process.stdout.on('data', (data) => {
+            Respuesta = data.toString();
+            Respuesta = Respuesta.split("\r\n").join("");
+            Respuesta = Respuesta.split("\n").join("");
+            console.log(Respuesta);
+            if(Respuesta == "No existe registro"){
+                res.json({ message:'Solicitud recibida correctamente, sin registro'});
+            }
+            else{
+                process.stdout.on('end', function(data) {
+                    setTimeout(() => {fs.unlinkSync(Respuesta);}, "2000")
+                    res.json({ message:'Solicitud recibida correctamente'});
+                })
+            }
+        });
+    }
+}
 
 // Exportar módulo
 module.exports = requestsController;

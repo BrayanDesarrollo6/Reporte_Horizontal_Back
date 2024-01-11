@@ -12,3 +12,26 @@ DirectoryReporteHorizontal = "./src/database/"
 DirectoryReporteLiquidaciones = "./src/database/"
 DirectoryReporteReLiquidaciones = "./src/database/"
 DirectoryReporteTxt = "./src/database/"
+
+# Formatos
+DirectoryFormatoOrdenIngreso = "./src/database/formatoOrdenIngreso.xlsx"
+
+"""
+# Plantillas
+DirectoryPlantillaLiquidacion = "./database/Liquidacion.xlsx"
+DirectoryPlantillaNovedades = "./database/Novedades.xlsx"
+DirectoryPlantillaTerceros = "./database/Terceros.xlsx"
+
+# Json
+DirectoryObtenerEmpresasLQ = "./database/VariablesEntornoLQ.json"
+DirectoryObtenerEmpresasReLQ = "./database/VariablesEntornoReLQ.json"
+
+# Reportes
+DirectoryReporteHorizontal = "./database/"
+DirectoryReporteLiquidaciones = "./database/"
+DirectoryReporteReLiquidaciones = "./database/"
+DirectoryReporteTxt = "./database/"
+
+# Formatos
+DirectoryFormatoOrdenIngreso = "./database/formatoOrdenIngreso.xlsx"
+"""

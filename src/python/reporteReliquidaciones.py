@@ -231,10 +231,10 @@ elif(Anio not in (None, "undefined", "") and Mes in (None, "undefined", "")):
     fecha = datetime.strptime(date, "%Y-%m-%d")
     ultimo_dia_anio = datetime(fecha.year, 12, 31).date()
     date2 = str(ultimo_dia_anio)
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&reliquidacion_lp.Fecha_envio_a_pago_op=58"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&reliquidacion_lp.Fecha_envio_a_pago_op=58"
     df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
     
@@ -244,10 +244,10 @@ else:
     ultimo_dia = calendar.monthrange(fecha.year, fecha.month)[1]
     fecha_ultimo_dia = fecha.replace(day=ultimo_dia).date()
     date2 = str(fecha_ultimo_dia)
-    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    URL = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Conceptos_De_Re_Liquidaci_n_Report/3juBT5YjxpXsDvAmfX76TkE4B4v2gwsDbZtxgrqZfDjHE7zFw5T8rHnjpFZuruae3PC7g6uww4761Xtm5h97yDj4hka5ws5xXabR?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&reliquidacion_lp.Fecha_envio_a_pago_op=58"
     df = pd.read_excel(URL)
     df1 = pd.DataFrame(df)
-    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&liquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&liquidacion_lp.Fecha_envio_a_pago_op=58"
+    URL2 = "https://creatorapp.zohopublic.com/hq5colombia/compensacionhq5/xls/Prestaci_n_Social_Re_Liquidaci_n_Report/BC3FExKk0GgnAgbYaqrODw2gNbJe505hXt6OCHB2G0gvAuNTe7Ora79UMead2XdWFtUGVQbYb4epCSDwwZJ5SdMe98hd3YOeghhH?reliquidacion_lp.Empresa_Usuaria="+Empresa_+"&reliquidacion_lp.Estado=["+Estado_+"]"+"&reliquidacion_lp.Fecha_envio_a_pago=" + date + ";" + date2 + "&reliquidacion_lp.Fecha_envio_a_pago_op=58"
     df2 = pd.read_excel(URL2)
     df3 = pd.DataFrame(df2)
 

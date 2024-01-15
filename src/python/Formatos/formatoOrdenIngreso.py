@@ -258,7 +258,7 @@ def add_header_2(ws):
     style_headers_2(title_cell)
     fecha_actual = datetime.now()
     formato_fecha = fecha_actual.strftime("%d-%m-%Y")
-    value = f"Código: MM-AT-F-02\nFecha: {formato_fecha}\nVersión: 2\nPágina: 1/1"
+    value = f"Código: MM-AT-F-02\nFecha: 19-12-2022\nVersión: 2\nPágina: 1/1"
     title_cell.value = value
 
     for i in range(3):

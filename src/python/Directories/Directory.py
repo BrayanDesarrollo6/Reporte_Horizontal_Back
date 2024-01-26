@@ -35,4 +35,5 @@ DirectoryReporteTxt = "./database/"
 
 # Formatos
 DirectoryFormatoOrdenIngreso = "./database/formatoOrdenIngreso.xlsx"
+DirectoryFormatoFacturacionExamen = "./database/formatoFacturacionExamen.xlsx"
 """

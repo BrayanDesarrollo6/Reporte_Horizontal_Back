@@ -2,7 +2,9 @@ import sys
 import json
 from Access.Getaccess import *
 import Formatos.formatoOrdenIngreso as process_orden_ingreso
-from Formatos.fileUploadOrdenIngreso import *
+import Formatos.formatoFacturacionExamen as process_facturacion_examen
+from Formatos.fileUploadOrdenIngreso import updatedata
+from Formatos.fileUpload import Updatedata
 
 def procesar_formato(data):
     
@@ -13,6 +15,7 @@ def procesar_formato(data):
 
         formatos = {
             "orden_ingreso": process_orden_ingreso,
+            "facturacion_examen" : process_facturacion_examen,
         }
 
         if formato in formatos:
@@ -24,8 +27,12 @@ def procesar_formato(data):
             access_token = obtener_access_token()
         
             if access_token:
-                if(access_token != None):
-                    updatedata(access_token,file_path,record_id)
+                    if formato == "orden_ingreso":
+                        updatedata(access_token,file_path,record_id)
+                    elif formato == "facturacion_examen":
+                        report = json_object['data']['formato']['reporte']
+                        field = json_object['data']['formato']['campo']
+                        Updatedata(access_token,file_path,record_id,report,field)
             
         else:
             print(f"Error: Módulo no encontrado para el formato {formato}")

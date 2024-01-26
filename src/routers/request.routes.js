@@ -30,5 +30,6 @@ router.get('/procesarrelq', requestController.ReporteReLiquidacionResponseDocume
 
 //RUTA 6 - API sin frontexterno, directo zoho
 router.post('/api/v1/formatoOrdenIngreso', requestController.formatoOrdenIngreso)
+router.post('/api/v1/formatoFacturacionExamenes', requestController.formatoFacturacionExamenes)
 
 module.exports = router;

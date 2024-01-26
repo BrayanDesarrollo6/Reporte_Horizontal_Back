@@ -111,3 +111,60 @@ content-type: application/json
     ]
   }
 }
+
+###
+
+POST http://localhost:4001/api/v1/formatoFacturacionExamenes
+content-type: application/json
+
+{
+  "data": {
+    "ID_generado": "",
+    "formato": {
+      "nombre": "facturacion_examen",
+      "reporte": "",
+      "campo": ""
+    },
+    "postulados": [
+      {
+        "proveedor": "HQ5",
+        "cliente": "TESTING PRO",
+        "cargo": "DEVELOPER MASTER",
+        "nombre": "HQ5 TEMPO TECNO",
+        "documento": "159264873",
+        "requisicion": "20027",
+        "tipo_examen": "EXAMEN PRO",
+        "fecha_examen": "HOY",
+        "centro_medico": "EL MAS CERCANO",
+        "sede_medica": "LA MAS LEJOS",
+        "examenes": "TEST TEST TEST TEST"
+      },
+      {
+        "proveedor": "HQ5",
+        "cliente": "TESTING PRO",
+        "cargo": "DEVELOPER MASTER",
+        "nombre": "HQ5 TEMPO TECNO",
+        "documento": "159264873",
+        "requisicion": "20027",
+        "tipo_examen": "EXAMEN PRO",
+        "fecha_examen": "HOY",
+        "centro_medico": "EL MAS CERCANO",
+        "sede_medica": "LA MAS LEJOS",
+        "examenes": "TEST TEST TEST TEST"
+      },
+      {
+        "proveedor": "HQ5",
+        "cliente": "TESTING PRO",
+        "cargo": "DEVELOPER MASTER",
+        "nombre": "HQ5 TEMPO TECNO",
+        "documento": "159264873",
+        "requisicion": "20027",
+        "tipo_examen": "EXAMEN PRO",
+        "fecha_examen": "HOY",
+        "centro_medico": "EL MAS CERCANO",
+        "sede_medica": "LA MAS LEJOS",
+        "examenes": "TEST TEST TEST TEST"
+      }
+    ]
+  }
+}

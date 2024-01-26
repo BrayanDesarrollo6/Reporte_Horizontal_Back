@@ -324,5 +324,34 @@ requestsController.formatoOrdenIngreso = (req, res) => {
     }
 }
 
+//Funcion para generar el archivo de formato facturacion examenes medicos
+requestsController.formatoFacturacionExamenes = (req, res) => {
+    const { body } = req;
+    const jsonString = JSON.stringify(body);
+    // Condicionales
+    if(jsonString != "")
+    {
+        const process = spawn('python',[PythonFormatos,jsonString]);
+        process.stderr.on("data",(data)=>{
+            console.error('stderr:',data.toString());
+        })
+        process.stdout.on('data', (data) => {
+            Respuesta = data.toString();
+            Respuesta = Respuesta.split("\r\n").join("");
+            Respuesta = Respuesta.split("\n").join("");
+            console.log(Respuesta);
+            if(Respuesta == "No existe registro"){
+                res.json({ message:'Solicitud recibida correctamente, sin registro'});
+            }
+            else{
+                process.stdout.on('end', function(data) {
+                    setTimeout(() => {fs.unlinkSync(Respuesta);}, "2000")
+                    res.json({ message:'Solicitud recibida correctamente'});
+                })
+            }
+        });
+    }
+}
+
 // Exportar módulo
 module.exports = requestsController;

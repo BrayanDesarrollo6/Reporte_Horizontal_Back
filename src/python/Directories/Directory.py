@@ -15,6 +15,7 @@ DirectoryReporteTxt = "./src/database/"
 
 # Formatos
 DirectoryFormatoOrdenIngreso = "./src/database/formatoOrdenIngreso.xlsx"
+DirectoryFormatoFacturacionExamen = "./src/database/formatoFacturacionExamen.xlsx"
 
 """
 # Plantillas

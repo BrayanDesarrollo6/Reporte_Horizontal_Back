@@ -12,6 +12,7 @@ from openpyxl.drawing.image import Image
 import requests
 from io import BytesIO
 from Directories.Directory import DirectoryReporteHorizontal
+from Prenomina.accessToken import funcionesGenerales
 
 # reemplazar acentos
 def normalize(s):
@@ -57,10 +58,42 @@ def mesName(mes):
     return mes_   
 def custom_xl_col_to_name(col):
     return str(col + 1)  # Sumar 1 ya que los índices de las columnas comienzan desde 1 en Excel
+def hour_to_day(horas,horas_mes):
+    return (horas /(horas_mes))
+def horas_df(df,columna):
+    return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum())
+def dias_df(df,columna,horasDia_):
+    return hour_to_day(abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum()),horasDia_)
+def valor_df(df,columna):
+    return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum())
+def valor_negativo_df(df,columna):
+    return df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum()
+def separar_texto(texto):
+    if texto and texto != "nan":
+        partes = texto.split(" - ")
+        primera_palabra = partes[0]
+        segunda_palabra = partes[1]
+    else:
+        primera_palabra = ""
+        segunda_palabra = ""
+    return primera_palabra,segunda_palabra
 # Función secundaria 
-def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal):
+def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar = {}
-    
+    horasDia_ = 7.83
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada laboral medio tiempo"):
+        horasDia_ = 4
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada laboral por días"):
+        horasDia_ = 8
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada laboral 180 horas"):
+        horasDia_ = 6
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada laboral 150 horas"):
+        horasDia_ = 5
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Destajo"):
+        horasDia_ = 8
+    if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada Laboral 190 Horas"):
+        horasDia_ = 6.33
+        
     ##Informacion general inicial
     FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
     tipoPeriodo_ = "1Q"
@@ -73,13 +106,16 @@ def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizo
     FilaAgregar["No. factura"] = "0"
     FilaAgregar["Codigo compañía"] = ContratoPos.iloc[0]['Código del cliente']
     FilaAgregar["Empresa a la que se le factura"] = "SUPPLA"
-    FilaAgregar["Cost center"] = " "
-    FilaAgregar["Cost center name"] = " "
-    FilaAgregar["City -población"] = " "
-    FilaAgregar["Cu (customer -cliente)"] = " "
-    FilaAgregar["Cu name"] = " "
-    FilaAgregar["At (actividad)"] = " "
-    FilaAgregar["At name"] = " "
+    cost_name , cost = separar_texto(str(ContratoPos.iloc[0]['Sub centro de costo - Cost center']))
+    FilaAgregar["Cost center"] = cost
+    FilaAgregar["Cost center name"] = cost_name
+    FilaAgregar["City - población"] = str(ContratoPos.iloc[0]['Ciudad'])
+    cu_name , cu = separar_texto(str(ContratoPos.iloc[0]['Proyecto - CU']))
+    FilaAgregar["Cu (customer -cliente)"] = cu
+    FilaAgregar["Cu name"] = cu_name
+    at_name , at = separar_texto(str(ContratoPos.iloc[0]['Naturaleza Centro Costo - AT']))
+    FilaAgregar["At (actividad)"] = at
+    FilaAgregar["At name"] = at_name
     FilaAgregar["Cuenta"] = " "
     FilaAgregar["Cedula"] = ContratoPos.iloc[0]['Numero de Identificación']
     FilaAgregar["Nombre empleado"] = ContratoPos.iloc[0]['Nombres y Apellidos']
@@ -88,206 +124,275 @@ def generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizo
     FilaAgregar["Fecharetiro"] = pd.to_datetime(ContratoPos.iloc[0]['Fecha Retiro']).date()
     FilaAgregar["Estado"] = ContratoPos.iloc[0]['Estado Trabajador']
     FilaAgregar["Tipo contrato"] = ContratoPos.iloc[0]['Tipo de Contrato']
-    FilaAgregar["Salario basico"] = ContratoPos.iloc[0]['Salario Base']
+    FilaAgregar["Salario basico"] = (float(ContratoPos.iloc[0]['Salario Base']))
     FilaAgregar["Dias Salario (pagos nómina)"] = ContratoPos.iloc[0]['Días Trabajados']
     #HASTA AQUI NARANJA
-    # abs(ContratoPos.loc[ (ContratoPos['Concepto'] == "DevOtroConceptoNS")  & (dfAcumuladoEmpleado_['Neto'] > 0), 'Neto'].sum())
-    FilaAgregar["Grupo # 1 Dias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Grupo # 2 Dias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Grupo # 3 Dias ausencias injustificadas, sanciones, dominical, Licencia No Remunerada"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Total días de liquidación (mes o quincena)"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor Salario"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Reajuste salario"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Aux.transporte"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Reajuste aux. transporte"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Auxilio conectividad"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor hora ordinaria"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Cantidad. HED hora extra diurna 1,25"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor. HED hora extra diurna 1,25"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Cantidad. HEN hora extra nocturna 1,75"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor. HEN hora extra nocturna 1,75"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Cantidad. HEDN Hora extra dominical nocturna 2.50%"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor HEDN Hora extra dominical nocturna 2.50%"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Cantidad. HEFN Hora extra festiva nocturna 2.50%"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Valor. HEFN Hora extra festiva nocturna 2.50%"] = ContratoPos.iloc[0]['Días Trabajados']
-    FilaAgregar["Cantidad. HEDD hora extra diurna dominical 2.00%"] = ""
-    FilaAgregar["Valor. HEDD hora extra diurna dominical 2.00%"] = ""
-    FilaAgregar["Cantidad. HEFD hora extra diurna Festiva 2.00%"] = ""
-    FilaAgregar["Valor. HEFD hora extra diurna Festiva 2.00%"] = ""
-    FilaAgregar["Reajuste Cantidad horas extras"] = ""
-    FilaAgregar["Reajuste Valor horas extras"] = ""
-    FilaAgregar["Total cantidad horas extras sin R.N."] = ""
-    FilaAgregar["Total Valor  extras sin R.N."] = ""
-    FilaAgregar["Cantidad  HDD hora ordinaria dominical Diurna 1.75"] = ""
-    FilaAgregar["Valor HDD hora ordinaria dominical Diurna 1.75"] = ""
-    FilaAgregar["Cantidad  HFD hora ordinaria festiva Diurna  1.75"] = ""
-    FilaAgregar["Valor  HFD hora ordinaria festiva Diurna  1.75"] = ""
-    FilaAgregar["Cantidad. RN recargo nocturna 0,35%"] = ""
-    FilaAgregar["Valor. RN recargo nocturna 0,35%"] = ""
-    FilaAgregar["Cantidad. HDN Hora dominical nocturno 2.10%"] = ""
-    FilaAgregar["Valor. HDN Hora dominical nocturno 2.10%"] = ""
-    FilaAgregar["Cantidad. HFN Hora festivo nocturno 2.10%"] = ""
-    FilaAgregar["Valor. HDN Hora festivo nocturno 2.10%"] = ""
-    FilaAgregar["Cantidad. HDNC hora dominical nocturno Compensado 1.10%"] = ""
-    FilaAgregar["Valor. HDNC hora dominical nocturno Compensado 1.10%"] = ""
-    FilaAgregar["Cantidad. HDNC hora dominical diurno Compensado 0.75%"] = ""
-    FilaAgregar["Valor. HDNC hora dominical nocturno Compensado 0.75%"] = ""
-    FilaAgregar["Cantidad. Reajuste recargos"] = ""
-    FilaAgregar["Valor. Reajuste recargos"] = ""
-    FilaAgregar["Total cantidad. Recargo"] = ""
-    FilaAgregar["Total Valor  Recargo"] = ""
-    FilaAgregar["Total cantidad HE + Recargos"] = ""
-    FilaAgregar["Total valor HE + Recargos"] = ""
-    FilaAgregar["Días incapacidad enfermedad general (Días 1 y 2)"] = ""
-    FilaAgregar["Valor Días incapacidad enfermedad general (Días 1 y 2)"] = ""
-    FilaAgregar["Días incapacidad accidente de trabajo"] = ""
-    FilaAgregar["Valor incapacidad accidente de trabajo"] = ""
-    FilaAgregar["Días incapacidad enfermedad general 3 Días en adelante hasta el día 90"] = ""
-    FilaAgregar["Valor incapacidad enfermedad general 3 Días en adelante hasta el día 90"] = ""
-    FilaAgregar["Días incapacidad permanente entre día 91 al de 180 Días     (se paga al 50%)"] = ""
-    FilaAgregar["Valor incapacidad permanente entre día 91 al de 180 Días                (se paga al 50%)"] = ""
-    FilaAgregar["Días incapacidad permanente + de 180 Días"] = ""
-    FilaAgregar["Valor Días incapacidad permanente + de 180 Días"] = ""
-    FilaAgregar["Días licencia de maternidad"] = ""
-    FilaAgregar["Valor Licencia de Maternidad"] = ""
-    FilaAgregar["Días Licencia de Paternidad"] = ""
-    FilaAgregar["Valor Licencia de Paternidad"] = ""
-    FilaAgregar["Días Vacaciones en Disfrute Causadas"] = ""
-    FilaAgregar["Valor Vacaciones en Disfrute Causadas"] = ""
-    FilaAgregar["Grupo # 2 Total días ausencias justificadas sin cobro"] = ""
-    FilaAgregar["Grupo # 2 Valor ausencias justificadas sin cobro"] = ""
-    FilaAgregar["Días Vacaciones en Disfrute Anticipadas"] = ""
-    FilaAgregar["Valor Vacaciones en Disfrute Anticipadas"] = ""
-    FilaAgregar["Días Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)"] = ""
-    FilaAgregar["Valor Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)"] = ""
-    FilaAgregar["Días Permiso Justificado - Covid prevención aislamiento"] = ""
-    FilaAgregar["Valor Permiso Justificado - Covid prevención aislamiento"] = ""
-    FilaAgregar["Día Familiar"] = ""
-    FilaAgregar["Valor Día Familiar"] = ""
-    FilaAgregar["Día Compensación por desempeño"] = ""
-    FilaAgregar["Valor Día Compensación por desempeño"] = ""
-    FilaAgregar["Días Calamidad Domestica (de 1 o 2 Días)"] = ""
-    FilaAgregar["Valor Calamidad Domestica (de 1 o 2 Días)"] = ""
-    FilaAgregar["Dia Libre Jurado Votaciones"] = ""
-    FilaAgregar["Valor Libre Jurado Votaciones"] = ""
-    FilaAgregar["Días Licencia Remunerado (mayor a 2 Días) Aprobación RH"] = ""
-    FilaAgregar["Valor Licencia Remunerado (mayor a 2 Días) Aprobación RH"] = ""
-    FilaAgregar["Días Licencia Remunerada - covid casos vulnerables"] = ""
-    FilaAgregar["Valor Licencia Remunerada - covid casos vulnerables"] = ""
-    FilaAgregar["Días Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)"] = ""
-    FilaAgregar["Valor Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)"] = ""
-    FilaAgregar["Días Licencia de Matrimonio"] = ""
-    FilaAgregar["Valor Licencia de Matrimonio"] = ""
-    FilaAgregar["Dias Inasistencia por Alteración del Orden Publico 14708"] = ""
-    FilaAgregar["Valor Inasistencia por Alteración del Orden Publico 14708"] = ""
-    FilaAgregar["Diaz Hospitalizacion"] = ""
-    FilaAgregar["Valor Hospitalizacion"] = ""
-    FilaAgregar["Grupo #1 Total días ausencias justificadas con reconocimiento"] = ""
-    FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] = ""
-    FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = ""
-    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = ""
-    FilaAgregar["Días Suspensión (originada Sanción)"] = ""
-    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = ""
-    FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] = ""
-    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = ""
-    FilaAgregar["Días Inasistencia injustificada"] = ""
-    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = ""
-    FilaAgregar["Grupo # 3 Total Dias ausencias injustificadas, sanciones, dominical"] = ""
-    FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] = ""
-    FilaAgregar["Indemnización, Bono por Retiro o Suma transaccional"] = ""
-    FilaAgregar["Auxilio desplazamiento (parametrizado en el sistema por días laborados depende lugar trabajo y lugar residencia)"] = ""
-    FilaAgregar["Gastos de transporte fijo (monto mensual asignado para desempeño de sus funciones ej. Comerciales, mantenimiento, gerentes, area seguridad etc)"] = ""
-    FilaAgregar["Gastos de transporte ocasional (reportado por la operación quincenalmente)"] = ""
-    FilaAgregar["Bonificacion no constitutiva de salario  BNCS"] = ""
-    FilaAgregar["Bonificacion salarial"] = ""
-    FilaAgregar["Total conceptos nómina"] = ""
-    FilaAgregar["% Porcentaje Arl"] = ""
-    FilaAgregar["Arl"] = ""
-    FilaAgregar["Salud"] = ""
-    FilaAgregar["Pension 12%"] = ""
-    FilaAgregar["Total Seguridad Social"] = ""
-    FilaAgregar["Caja de comp 4%"] = ""
-    FilaAgregar["Sena 3%"] = ""
-    FilaAgregar["Icbf 2%"] = ""
-    FilaAgregar["Valor parafiscales"] = ""
-    FilaAgregar["Cesantias 8,33%"] = ""
-    FilaAgregar["Int. cesantias 1%"] = ""
-    FilaAgregar["Prima 8,33%"] = ""
-    FilaAgregar["Vacaciones 4.1667%"] = ""
-    FilaAgregar["Valor prestaciones sociales"] = ""
-    FilaAgregar["Total nomina + Seguridad Social + parafiscales + prestaciones"] = ""
-    FilaAgregar["Administración temporales (el % que tenga cada temporal)"] = ""
-    FilaAgregar["Examenes medicos  servicios"] = ""
-    FilaAgregar["Menos servicio de alimentacion"] = ""
-    FilaAgregar["Subtotal factura suppla"] = ""
-    FilaAgregar["Iva del 19%"] = ""
-    FilaAgregar["Total Neto Factura"] = ""
+    FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = 0
+    FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = 0
+    FilaAgregar["Grupo # 3\nDias ausencias injustificadas, sanciones, dominical, Licencia No Remunerada"] = 0
+    FilaAgregar["Total días de liquidación (mes o quincena)"] = 0
+    FilaAgregar["Valor Salario"] = valor_df(ContratoPos, "Valor Salario")
+    FilaAgregar["Reajuste salario"] = valor_df(ContratoPos, "Reajuste salario")
+    FilaAgregar["Aux.transporte"] = valor_df(ContratoPos, "Aux.transporte")
+    FilaAgregar["Reajuste aux. transporte"] = valor_df(ContratoPos, "Reajuste aux. transporte")
+    FilaAgregar["Auxilio conectividad"] = valor_df(ContratoPos, "Auxilio conectividad")
+    FilaAgregar["Valor hora ordinaria"] = FilaAgregar["Salario basico"] / 235
+    # Horas extras
+    columnas_horas = [
+        "HED hora extra diurna 1,25",
+        "HEN hora extra nocturna 1,75",
+        "HEDN Hora extra dominical nocturna 2.50",
+        "HEFN Hora extra festiva nocturna 2.50",
+        "HEDD hora extra diurna dominical 2.00",
+        "HEFD hora extra diurna Festiva 2.00",
+    ]
+    for tipo in columnas_horas:
+        FilaAgregar[f"Cantidad. {tipo}%"] = horas_df(ContratoPos, tipo)
+        FilaAgregar[f"Valor. {tipo}%"] = valor_df(ContratoPos, tipo)
+    # AGREGAR REAJUSTE
+    FilaAgregar["Reajuste Cantidad horas extras"] = horas_df(ContratoPos,"Reajuste horas extras")
+    FilaAgregar["Reajuste Valor horas extras"] = valor_df(ContratoPos,"Reajuste horas extras")
+    # HORAS
+    horasExtras_ = sum(FilaAgregar[f"Cantidad. {columna}%"] for columna in columnas_horas)
+    horasExtras_ += FilaAgregar["Reajuste Cantidad horas extras"]
+    # VALOR
+    valorExtras_ = sum(FilaAgregar[f"Valor. {columna}%"] for columna in columnas_horas)
+    valorExtras_ += FilaAgregar["Reajuste Valor horas extras"]
+    # ASIGNAR TOTALES
+    FilaAgregar["Total cantidad horas extras sin R.N."] = horasExtras_
+    FilaAgregar["Total Valor  extras sin R.N."] = valorExtras_
+    # RECARGOS
+    columnas_recargos = [
+        "HDD hora ordinaria dominical Diurna 1.75",
+        "HFD hora ordinaria festiva Diurna 1.75",
+        "RN recargo nocturna 0,35",
+        "HDN Hora dominical nocturno 2.10",
+        "HFN Hora festivo nocturno 2.10",
+        "HDNC hora dominical nocturno Compensado 1.10",
+        "HDDC hora dominical diurno Compensado 0.75",
+        "Reajuste recargos"
+    ]
+    for tipo in columnas_recargos:
+        FilaAgregar[f"Cantidad. {tipo}"] = horas_df(ContratoPos, tipo)
+        FilaAgregar[f"Valor. {tipo}"] = valor_df(ContratoPos, tipo)
+    horasRecargos_ = sum(FilaAgregar[f"Cantidad. {columna}"] for columna in columnas_recargos)
+    valorRecargos_ = sum(FilaAgregar[f"Valor. {columna}"] for columna in columnas_recargos)
+    # totales recargos
+    FilaAgregar["Total cantidad. Recargo"] = horasRecargos_
+    FilaAgregar["Total Valor. Recargo"] = valorRecargos_
+    # TOTAL EXTRAS Y RECARGOS
+    FilaAgregar["Total cantidad HE + Recargos"] = horasRecargos_ + horasExtras_
+    FilaAgregar["Total valor HE + Recargos"] = valorRecargos_ + valorExtras_
+    # Incapacidad empresa
+    FilaAgregar["Días incapacidad enfermedad general (Días 1 y 2)"] = dias_df(ContratoPos,"incapacidad enfermedad general (Días 1 y 2)",horasDia_)
+    FilaAgregar["Valor Días incapacidad enfermedad general (Días 1 y 2)"] = valor_df(ContratoPos,"incapacidad enfermedad general (Días 1 y 2)")
+    # Ausencias justificadas sin cobro
+    # Cálculo de días y valor para cada tipo de ausencia justificada sin cobro
+    tipos_ausencias = [
+        "incapacidad accidente de trabajo",
+        "incapacidad enfermedad general 3 Días en adelante hasta el día 90",
+        "incapacidad permanente entre día 91 al de 180 Días",
+        "incapacidad permanente + de 180 Días",
+        "licencia de maternidad",
+        "Licencia de Paternidad",
+        "Vacaciones en Disfrute Causadas"
+    ]
+    for tipo in tipos_ausencias:
+        FilaAgregar[f"Días {tipo}"] = dias_df(ContratoPos, tipo, horasDia_)
+        FilaAgregar[f"Valor {tipo}"] = valor_df(ContratoPos, tipo)
+    # TOTALIZAR GRUPO 2
+    # Suma total de días y valor para el grupo 2
+    diasGrupo2_ = sum(FilaAgregar[f"Días {tipo}"] for tipo in tipos_ausencias)
+    valorGrupo2_ = sum(FilaAgregar[f"Valor {tipo}"] for tipo in tipos_ausencias)
+    FilaAgregar["Grupo # 2 Total días ausencias justificadas sin cobro"] = diasGrupo2_
+    FilaAgregar["Grupo # 2 Valor ausencias justificadas sin cobro"] = valorGrupo2_
+    # EMPIEZA GRUPO 1
+    FilaAgregar["Días Vacaciones en Disfrute Anticipadas"] = dias_df(ContratoPos,"Vacaciones en Disfrute Anticipadas",horasDia_)
+    FilaAgregar["Valor Vacaciones en Disfrute Anticipadas"] = valor_df(ContratoPos,"Vacaciones en Disfrute Anticipadas")
+    # Realizar suma para licencia remunerada
+    diasLicencia_ = dias_df(ContratoPos,"Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)",horasDia_)
+    valorLicencia_ = valor_df(ContratoPos,"Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)")
+    if(diasLicencia_ > 2):
+        # valor dia
+        valordiaLicencia_ = valorLicencia_ / diasLicencia_
+        # Primeros dos dias
+        diasLicenca2_ = 2
+        valorLicencia2_ = valordiaLicencia_ * 2
+        # Despues de los dos dias
+        diasLicenca3_ = diasLicencia_ - 2
+        valorLicencia3_ = valordiaLicencia_ * diasLicenca3_
+    else:
+        # Primeros dos dias
+        diasLicenca2_ = diasLicencia_
+        valorLicencia2_ = valorLicencia_
+        # Despues de los dos dias
+        diasLicenca3_ = 0
+        valorLicencia3_ = 0
+    FilaAgregar["Días Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)"] = diasLicenca2_
+    FilaAgregar["Valor Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)"] = valorLicencia2_
+    FilaAgregar["Días Permiso Justificado - Covid prevención aislamiento"] = dias_df(ContratoPos,"Permiso Justificado - Covid prevención aislamiento",horasDia_)
+    FilaAgregar["Valor Permiso Justificado - Covid prevención aislamiento"] = valor_df(ContratoPos,"Permiso Justificado - Covid prevención aislamiento")
+    FilaAgregar["Día Familiar"] = dias_df(ContratoPos,"Día Familiar",horasDia_)
+    FilaAgregar["Valor Día Familiar"] = valor_df(ContratoPos,"Día Familiar")
+    FilaAgregar["Día Compensación por desempeño"] = dias_df(ContratoPos,"	Compensación por desempeño",horasDia_) 
+    FilaAgregar["Valor Día Compensación por desempeño"] = valor_df(ContratoPos,"	Compensación por desempeño")
+    FilaAgregar["Días Calamidad Domestica (de 1 o 2 Días)"] = dias_df(ContratoPos,"Calamidad Domestica (de 1 o 2 Días)",horasDia_)
+    FilaAgregar["Valor Calamidad Domestica (de 1 o 2 Días)"] = valor_df(ContratoPos,"Calamidad Domestica (de 1 o 2 Días)")
+    FilaAgregar["Dia Libre Jurado Votaciones"] = dias_df(ContratoPos,"Dia Libre Jurado Votaciones",horasDia_)
+    FilaAgregar["Valor Libre Jurado Votaciones"] = valor_df(ContratoPos,"Dia Libre Jurado Votaciones")
+    FilaAgregar["Días Licencia Remunerado (mayor a 2 Días) Aprobación RH"] = diasLicenca3_
+    FilaAgregar["Valor Licencia Remunerado (mayor a 2 Días) Aprobación RH"] = valorLicencia3_
+    FilaAgregar["Días Licencia Remunerada - covid casos vulnerables"] = dias_df(ContratoPos,"Días Licencia Remunerada - covid casos vulnerables",horasDia_) 
+    FilaAgregar["Valor Licencia Remunerada - covid casos vulnerables"] = valor_df(ContratoPos,"Días Licencia Remunerada - covid casos vulnerables")
+    FilaAgregar["Días Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)"] = dias_df(ContratoPos,"Licencia de Luto 5 Días hab",horasDia_)
+    FilaAgregar["Valor Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)"] = valor_df(ContratoPos,"Licencia de Luto 5 Días hab")
+    FilaAgregar["Días Licencia de Matrimonio"] = dias_df(ContratoPos,"Licencia de Matrimonio",horasDia_)
+    FilaAgregar["Valor Licencia de Matrimonio"] = valor_df(ContratoPos,"Licencia de Matrimonio")
+    FilaAgregar["Dias Inasistencia por Alteración del Orden Publico 14708"] = dias_df(ContratoPos,"Inasistencia por Alteración",horasDia_)
+    FilaAgregar["Valor Inasistencia por Alteración del Orden Publico 14708"] = valor_df(ContratoPos,"Inasistencia por Alteración")
+    FilaAgregar["Dias Hospitalizacion"] = dias_df(ContratoPos,"Hospitalizacion",horasDia_)
+    FilaAgregar["Valor Hospitalizacion"] = valor_df(ContratoPos,"Hospitalizacion")
+    # TOTALIZAR GRUPO 1
+    # DIAS
+    columnas_dias_grupo1 = [
+        "Dias Hospitalizacion",
+        "Dias Inasistencia por Alteración del Orden Publico 14708",
+        "Días Licencia de Matrimonio",
+        "Días Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)",
+        "Días Licencia Remunerada - covid casos vulnerables",
+        "Días Licencia Remunerado (mayor a 2 Días) Aprobación RH",
+        "Dia Libre Jurado Votaciones",
+        "Días Calamidad Domestica (de 1 o 2 Días)",
+        "Día Compensación por desempeño",
+        "Día Familiar",
+        "Días Permiso Justificado - Covid prevención aislamiento",
+        "Días Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)",
+        "Días Vacaciones en Disfrute Anticipadas"
+    ]
+    columnas_valor_grupo1 = [
+        "Valor Hospitalizacion",
+        "Valor Inasistencia por Alteración del Orden Publico 14708",
+        "Valor Licencia de Matrimonio",
+        "Valor Licencia de Luto 5 Días hab (muerte de un familiar *1er grado de consanguinidad 5)",
+        "Valor Licencia Remunerada - covid casos vulnerables",
+        "Valor Licencia Remunerado (mayor a 2 Días) Aprobación RH",
+        "Valor Libre Jurado Votaciones",
+        "Valor Calamidad Domestica (de 1 o 2 Días)",
+        "Valor Día Compensación por desempeño",
+        "Valor Día Familiar",
+        "Valor Permiso Justificado - Covid prevención aislamiento",
+        "Valor Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)",
+        "Valor Vacaciones en Disfrute Anticipadas"
+    ]
+    # Inicializar sumas de días y valores
+    diasGrupo1_ = 0
+    valorGrupo1_ = 0
+
+    # Calcular sumas de días y valores
+    for columna in columnas_dias_grupo1:
+        diasGrupo1_ += FilaAgregar[columna]
+    for columna in columnas_valor_grupo1:
+        valorGrupo1_ += FilaAgregar[columna]
+    # TOTAL
+    FilaAgregar["Grupo #1 Total días ausencias justificadas con reconocimiento"] = diasGrupo1_
+    FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] = valorGrupo1_
+    # EMPIEZA GRUPO 3
+    FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = dias_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_)
+    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_negativo_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH")
+    FilaAgregar["Días Suspensión (originada Sanción)"] = dias_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
+    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_negativo_df(ContratoPos,"Suspensión (originada Sanción)")
+    FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] = dias_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
+    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_negativo_df(ContratoPos,"Dominical por Suspensión (Inasistencia)")
+    FilaAgregar["Días Inasistencia injustificada"] = dias_df(ContratoPos,"Inasistencia injustificada",horasDia_)
+    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_negativo_df(ContratoPos,"Inasistencia injustificada")
+    # TOTALIZAR GRUPO 3
+    diasGrupo3_ = FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] + FilaAgregar["Días Suspensión (originada Sanción)"] + FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] + FilaAgregar["Días Inasistencia injustificada"]
+    valorGrupo3_ = FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] + FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] + FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] + FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"]
+    FilaAgregar["Grupo # 3 Total Dias ausencias injustificadas, sanciones, dominical"] = diasGrupo3_
+    FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] = valorGrupo3_
+    # OTROS DEVENGOS
+    FilaAgregar["Indemnización, Bono por Retiro o Suma transaccional"] = valor_df(ContratoPos,"Indemnización, Bono por Retiro o Suma transaccional")
+    FilaAgregar["Auxilio desplazamiento (parametrizado en el sistema por días laborados depende lugar trabajo y lugar residencia)"] = valor_df(ContratoPos,"Auxilio desplazamiento")
+    FilaAgregar["Gastos de transporte fijo (monto mensual asignado para desempeño de sus funciones ej. Comerciales, mantenimiento, gerentes, area seguridad etc)"] = valor_df(ContratoPos,"Gastos de transporte fijo")
+    FilaAgregar["Gastos de transporte ocasional (reportado por la operación quincenalmente)"] = valor_df(ContratoPos,"Gastos de transporte ocasional")
+    FilaAgregar["Bonificacion no constitutiva de salario  BNCS"] = valor_df(ContratoPos,"	Bonificacion no constitutiva de salario BNCS")
+    FilaAgregar["Bonificacion salarial"] = valor_df(ContratoPos,"Bonificacion salarial")
+    # TOTAL NOMINA 
+    otrosDevengos_ = FilaAgregar["Indemnización, Bono por Retiro o Suma transaccional"] + FilaAgregar["Auxilio desplazamiento (parametrizado en el sistema por días laborados depende lugar trabajo y lugar residencia)"] + FilaAgregar["Gastos de transporte fijo (monto mensual asignado para desempeño de sus funciones ej. Comerciales, mantenimiento, gerentes, area seguridad etc)"] + FilaAgregar["Gastos de transporte ocasional (reportado por la operación quincenalmente)"] + FilaAgregar["Bonificacion no constitutiva de salario  BNCS"] + FilaAgregar["Bonificacion salarial"]
+    totalesSalarioEXRN_ = FilaAgregar["Valor Salario"] + FilaAgregar["Reajuste salario"] + FilaAgregar["Aux.transporte"] + FilaAgregar["Reajuste aux. transporte"] + FilaAgregar["Auxilio conectividad"] + FilaAgregar["Total valor HE + Recargos"] 
+    totalNomina_ = totalesSalarioEXRN_ + FilaAgregar["Valor Días incapacidad enfermedad general (Días 1 y 2)"] + FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] + FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] + otrosDevengos_
+    FilaAgregar["Total conceptos nómina"] = totalNomina_
+    FilaAgregar["% Porcentaje Arl"] = str(ContratoPos.iloc[0]['Riesgo ARL']) + "%"
+    # SEGURIDAD SOCIAL
+    arl_ = float(ContratoPos.iloc[0]['ARL'])
+    salud_ = float(ContratoPos.iloc[0]['EPS'])
+    pension_ = float(ContratoPos.iloc[0]['AFP'])
+    FilaAgregar["Arl"] = (arl_)
+    FilaAgregar["Salud"] = (salud_)
+    FilaAgregar["Pension 12%"] = (pension_)
+    seguridadSocial_ = arl_ + salud_ + pension_
+    FilaAgregar["Total Seguridad Social"] = ( seguridadSocial_ )
+    # PARAFISCALES
+    ccf_ = float(ContratoPos.iloc[0]['CCF'])
+    sena_ = float(ContratoPos.iloc[0]['SENA'])
+    icbf_ =  float(ContratoPos.iloc[0]['ICBF'])
+    FilaAgregar["Caja de comp 4%"] = (ccf_)
+    FilaAgregar["Sena 3%"] = (sena_)
+    FilaAgregar["Icbf 2%"] = (icbf_)
+    parafiscales_ = ccf_ + sena_ + icbf_
+    FilaAgregar["Valor parafiscales"] = ( parafiscales_ )
+    # PROVISIONES
+    cesantias_ = float(ContratoPos.iloc[0]['Cesantías'])
+    interes_ = float(ContratoPos.iloc[0]['Interés cesantías'])
+    prima_ = float(ContratoPos.iloc[0]['Prima'])
+    vacaciones_ = float(ContratoPos.iloc[0]['Vacaciones tiempo'])
+    # ASIGNAR PROVISIONES
+    FilaAgregar["Cesantias 8,33%"] = (cesantias_)
+    FilaAgregar["Int. cesantias 1%"] = (interes_)
+    FilaAgregar["Prima 8,33%"] = (vacaciones_)
+    FilaAgregar["Vacaciones 4.1667%"] = (vacaciones_)
+    prestacionesSociales_ = cesantias_ + interes_ + prima_ + vacaciones_
+    FilaAgregar["Valor prestaciones sociales"] = ( prestacionesSociales_ )
+    # TOTAL NOMINA
+    totalNominaSS_ = totalNomina_ + prestacionesSociales_ + parafiscales_ + seguridadSocial_
+    FilaAgregar["Total nomina + Seguridad Social + parafiscales + prestaciones"] = (totalNominaSS_)
+    # FACTURACION
+    FilaAgregar["Administración temporales (el % que tenga cada temporal)"] = 0
+    FilaAgregar["Examenes medicos  servicios"] = 0
+    FilaAgregar["Menos servicio de alimentacion"] = 0
+    FilaAgregar["Subtotal factura suppla"] = 0
+    FilaAgregar["Iva del 19%"] = 0
+    FilaAgregar["Total Neto Factura"] = 0
     FilaAgregar["Justificación (para casos puntuales que se requieran detallar)"] = ""
-    FilaAgregar["Dcto my v/r pagado salario/Saldo en rojo"] = ""
-    FilaAgregar["Saldo reconocido por el cliente"] = ""
-    FilaAgregar["DEDUCCIONES VARIAS - NC"] = ""
-    FilaAgregar["Deducicon Casino"] = ""
-    FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] = ""
-    FilaAgregar["Seguridad Social Ley 1393 del 2010"] = ""
-    SumatoriaNetoDev = 0
-    SumatoriaNetoDed = 0
-    
-    #Ciclo para tomar informacion de los conceptos
-    # for elemento in ConceptosDev:
-    #     de = ContratoPos["Concepto"] == str(elemento)
-    #     Conce= ContratoPos[de]
-    #     Unidades = 0
-    #     Neto = 0
-    #     if (Conce.empty == False):
-    #         Unidades = Conce["Horas"].sum()
-    #         Neto = Conce["Neto"].sum()
-    #         SumatoriaNetoDev += Neto
-    #     if (elemento + " / Neto" in FilaAgregar):
-    #         FilaAgregar[elemento + " / Unidades"] += Unidades
-    #         FilaAgregar[elemento + " / Neto"] += Neto 
-    #     else:
-    #         FilaAgregar[elemento + " / Unidades"] = Unidades
-    #         FilaAgregar[elemento + " / Neto"] = Neto 
-    # FilaAgregar["Total Devengo"] = SumatoriaNetoDev
-    
-    # for elemento in ConceptosDed:
-    #     de = ContratoPos["Concepto"] == str(elemento)
-    #     Conce= ContratoPos[de]
-    #     Unidades = 0
-    #     Neto = 0
-    #     if (Conce.empty == False):
-    #         Unidades = Conce["Horas"].sum()
-    #         Neto = Conce["Neto"].sum()
-    #         SumatoriaNetoDed += Neto
-    #     if (elemento + " / Neto" in FilaAgregar):
-    #         FilaAgregar[elemento + " / Unidades"] += Unidades
-    #         FilaAgregar[elemento + " / Neto"] += Neto 
-    #     else:
-    #         FilaAgregar[elemento + " / Unidades"] = Unidades
-    #         FilaAgregar[elemento + " / Neto"] = Neto 
+    FilaAgregar["Dcto my v/r pagado salario/Saldo en rojo"] = valor_negativo_df(ContratoPos,"Dcto my v/r pagado salario/Saldo en rojo")
+    FilaAgregar["Saldo reconocido por el cliente"] = valor_negativo_df(ContratoPos,"Saldo reconocido por el cliente")
+    FilaAgregar["DEDUCCIONES VARIAS - NC"] = valor_negativo_df(ContratoPos,"DEDUCCIONES VARIAS - NC")
+    FilaAgregar["Deducicon Casino"] = valor_negativo_df(ContratoPos,"	Deducicon Casino")
+    FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] = float(ContratoPos.iloc[0]['Excedente seguridad social'])
+    FilaAgregar["Seguridad Social Ley 1393 del 2010"] = float(ContratoPos.iloc[0]['Seguridad Social Ley 1393 del 2010'])
+    # ASIGNAR DIAS DE NOVEDADES INICIALES
+    FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = diasGrupo1_
+    FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = diasGrupo2_
+    FilaAgregar["Grupo # 3\nDias ausencias injustificadas, sanciones, dominical, Licencia No Remunerada"] = diasGrupo3_
+    # ASIGNAR VALORES FINALES 
+    FilaAgregar["Examenes medicos  servicios"] = 0
+    FilaAgregar["Menos servicio de alimentacion"] = 0
+    administracion_ = totalNominaSS_ + FilaAgregar["Examenes medicos  servicios"] + FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] + FilaAgregar["Seguridad Social Ley 1393 del 2010"]
+    FilaAgregar["Administración temporales (el % que tenga cada temporal)"] = administracion_ * aiu
+    subtotal_ = totalNominaSS_ + FilaAgregar["Administración temporales (el % que tenga cada temporal)"] + FilaAgregar["Examenes medicos  servicios"] + FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] + FilaAgregar["Seguridad Social Ley 1393 del 2010"]
+    FilaAgregar["Subtotal factura suppla"] = subtotal_
+    FilaAgregar["Iva del 19%"] = subtotal_ * 0.19
+    FilaAgregar["Total Neto Factura"] = FilaAgregar["Subtotal factura suppla"] + FilaAgregar["Iva del 19%"]
     Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
     return Horizontal  
 # Funcion principal
 def procesar(df1, IdProceso):
+    global aiu
+    aiu = funcionesGenerales().getAIU("DHL SUPPLY CHAIN COLOMBIA")
     Horizontal = pd.DataFrame()
     Contrato  = df1['Numero de Contrato'].unique().tolist()
     IDPeriodo = df1['ID Periodo'].tolist()
     IDPeriodo = np.unique(IDPeriodo)
-    Conceptos = df1['Concepto'].unique().tolist()
-    Conceptos.sort()
-    ConceptosDev = []
-    ConceptosDed = []
-    for conceptosx in Conceptos:
-        Valores = df1['Concepto'] == str(conceptosx)
-        ContratoPos = df1[Valores]
-        Total = ContratoPos['Neto'].sum()
-        if(Total >= 0 ):
-            ConceptosDev.append(conceptosx)
-        else:
-            ConceptosDed.append(conceptosx)
-    Conceptos.clear()
-    Conceptos= ConceptosDev + ConceptosDed
-
     #Obtener información para agregar al nuevo data frame
     for j in IDPeriodo:
         for i in Contrato:
@@ -297,7 +402,7 @@ def procesar(df1, IdProceso):
             if IdProceso == "Agrupar ID proceso":
                 ContratoPos = ContratoPos[Valores2]
                 if ContratoPos.empty == False:
-                    Horizontal = generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal)
+                    Horizontal = generar_dataframe_horizontal(ContratoPos, Horizontal)
             else:
                 ContratoPos2 = ContratoPos[Valores2]
                 ID_Procesos = ContratoPos2['Id Proceso'].unique().tolist()
@@ -307,7 +412,7 @@ def procesar(df1, IdProceso):
                     # traigo de nuevo dataframe la fila o registro que contiene el proceso analizado y lo almaceno en contratopos
                     ContratoPos = ContratoPos2[Valores3]
                     if ContratoPos.empty == False:
-                        Horizontal = generar_dataframe_horizontal(ContratoPos, ConceptosDev, ConceptosDed, Horizontal)
+                        Horizontal = generar_dataframe_horizontal(ContratoPos, Horizontal)
             
     # Dataframe final para obtener los indices de las primeras columnas 
     Horizontal_heads_end = pd.DataFrame()
@@ -389,15 +494,13 @@ def procesar(df1, IdProceso):
         max_value = max(column_values, key=len)
         column_width = max(len(str(heading)), len(max_value))
         worksheet.set_column(i, i, column_width + 2)
-        
     contador = 0
     for k in Totales:
         Dato = ""
         if(str(k) != "nan"):
             Dato = str(k)
-        worksheet.write_string(MaxFilas-1, contador,Dato)
+        worksheet.write_string(MaxFilas, contador,Dato)
         contador += 1
-        
     writer.close()
     return NombreDocumento+".xlsx"
 

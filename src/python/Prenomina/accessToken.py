@@ -139,3 +139,23 @@ class funcionesGenerales():
                 header = {"Authorization":"Zoho-oauthtoken "+token, "Access-Control-Allow-Origin": "*"} 
                 r = requests.post(url_,data=Datos_,headers=header)
                 print(r.json())
+    def getAIU(self,nameCliente):
+
+        resultados_ = self.get_registro("refreshToken_zoho",["id","refresh"],["usuario = 'desarrollo3@hq5.com.co'"])
+        resultados = self.get_OneOrder("tokens",["access_token","expired_at"],"id",[f"refresh_token_id = '{resultados_[0]['id']}'"])
+        # Obtener el tiempo actual en milisegundos
+        inicio_ = int(time.time() * 1000)
+        token= resultados[0]['access_token']
+        if (resultados[0]['expired_at'] < inicio_):
+            token = self.access_token_zoho(resultados_[0]['id'])
+        url = f"https://creator.zoho.com/api/v2/hq5colombia/hq5/report/Ver_Cliente?EMPRESA_APLICAR_CONVOCATORIA={nameCliente}"
+        headers = {
+            "Authorization": f"Zoho-oauthtoken {token}"
+        }
+        response = requests.get(url,headers=headers)
+        resp = response.json()
+        if(response.status_code == 200):
+            res = resp['data']
+            aui_ = float(res[0]['aiu_cli']) / 100
+            return aui_
+        else: return 0.07

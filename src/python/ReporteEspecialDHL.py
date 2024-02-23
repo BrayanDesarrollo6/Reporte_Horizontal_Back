@@ -1,4 +1,5 @@
 import sys
+import zipfile36 as zipfile
 import pandas as pd
 import numpy as np
 import json
@@ -10,10 +11,16 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.drawing.image import Image
 import requests
+import os
 from io import BytesIO
 from Directories.Directory import DirectoryReporteHorizontal
 from Prenomina.accessToken import funcionesGenerales
+from resumenDHL import resumen
 
+def comprimir_archivos(archivos, archivo_zip):
+    with zipfile.ZipFile(archivo_zip, 'w') as zipf:
+        for archivo in archivos:
+            zipf.write(archivo, os.path.basename(archivo))
 # reemplazar acentos
 def normalize(s):
     replacements = (
@@ -185,7 +192,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Total valor HE + Recargos"] = valorRecargos_ + valorExtras_
     # Incapacidad empresa
     FilaAgregar["Días incapacidad enfermedad general (Días 1 y 2)"] = dias_df(ContratoPos,"incapacidad enfermedad general (Días 1 y 2)",horasDia_)
-    FilaAgregar["Valor Días incapacidad enfermedad general (Días 1 y 2)"] = valor_df(ContratoPos,"incapacidad enfermedad general (Días 1 y 2)")
+    FilaAgregar["Valor incapacidad enfermedad general (Días 1 y 2)"] = valor_df(ContratoPos,"incapacidad enfermedad general (Días 1 y 2)")
     # Ausencias justificadas sin cobro
     # Cálculo de días y valor para cada tipo de ausencia justificada sin cobro
     tipos_ausencias = [
@@ -320,7 +327,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     # TOTAL NOMINA 
     otrosDevengos_ = FilaAgregar["Indemnización, Bono por Retiro o Suma transaccional"] + FilaAgregar["Auxilio desplazamiento (parametrizado en el sistema por días laborados depende lugar trabajo y lugar residencia)"] + FilaAgregar["Gastos de transporte fijo (monto mensual asignado para desempeño de sus funciones ej. Comerciales, mantenimiento, gerentes, area seguridad etc)"] + FilaAgregar["Gastos de transporte ocasional (reportado por la operación quincenalmente)"] + FilaAgregar["Bonificacion no constitutiva de salario  BNCS"] + FilaAgregar["Bonificacion salarial"]
     totalesSalarioEXRN_ = FilaAgregar["Valor Salario"] + FilaAgregar["Reajuste salario"] + FilaAgregar["Aux.transporte"] + FilaAgregar["Reajuste aux. transporte"] + FilaAgregar["Auxilio conectividad"] + FilaAgregar["Total valor HE + Recargos"] 
-    totalNomina_ = totalesSalarioEXRN_ + FilaAgregar["Valor Días incapacidad enfermedad general (Días 1 y 2)"] + FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] + FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] + otrosDevengos_
+    totalNomina_ = totalesSalarioEXRN_ + FilaAgregar["Valor incapacidad enfermedad general (Días 1 y 2)"] + FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] + FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] + otrosDevengos_
     FilaAgregar["Total conceptos nómina"] = totalNomina_
     FilaAgregar["% Porcentaje Arl"] = str(ContratoPos.iloc[0]['Riesgo ARL']) + "%"
     # SEGURIDAD SOCIAL
@@ -367,9 +374,15 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Dcto my v/r pagado salario/Saldo en rojo"] = valor_negativo_df(ContratoPos,"Dcto my v/r pagado salario/Saldo en rojo")
     FilaAgregar["Saldo reconocido por el cliente"] = valor_negativo_df(ContratoPos,"Saldo reconocido por el cliente")
     FilaAgregar["DEDUCCIONES VARIAS - NC"] = valor_negativo_df(ContratoPos,"DEDUCCIONES VARIAS - NC")
-    FilaAgregar["Deducicon Casino"] = valor_negativo_df(ContratoPos,"	Deducicon Casino")
-    FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] = float(ContratoPos.iloc[0]['Excedente seguridad social'])
-    FilaAgregar["Seguridad Social Ley 1393 del 2010"] = float(ContratoPos.iloc[0]['Seguridad Social Ley 1393 del 2010'])
+    FilaAgregar["Deduccion Casino"] = valor_negativo_df(ContratoPos,"Deducicon Casino")
+    exedente_ = 0
+    ssLey_ = 0
+    if(str(ContratoPos.iloc[0]['Excedente seguridad social']) != "nan"):
+        exedente_ = float(ContratoPos.iloc[0]['Excedente seguridad social'])
+    if(str(ContratoPos.iloc[0]['Seguridad Social Ley 1393 del 2010']) != "nan"):
+        ssLey_ = float(ContratoPos.iloc[0]['Seguridad Social Ley 1393 del 2010'])
+    FilaAgregar["EXCEDENTE DE SEGURIDAD SOCIAL"] = exedente_
+    FilaAgregar["Seguridad Social Ley 1393 del 2010"] = ssLey_
     # ASIGNAR DIAS DE NOVEDADES INICIALES
     FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = diasGrupo1_
     FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = diasGrupo2_
@@ -415,6 +428,8 @@ def procesar(df1, IdProceso):
                         Horizontal = generar_dataframe_horizontal(ContratoPos, Horizontal)
             
     # Dataframe final para obtener los indices de las primeras columnas 
+    # print(Horizontal)
+    resumen_ = resumen().generarResumen(Horizontal)
     Horizontal_heads_end = pd.DataFrame()
     Horizontal_heads_end = Horizontal
     NombreDocumento = "Horizontal " + str(Horizontal.iloc[0]['Empresa a la que se le factura']) +"-"+ str(Horizontal.iloc[0]['Mes'])
@@ -425,13 +440,13 @@ def procesar(df1, IdProceso):
     FilaAgregar = {}
     Validador = False
     
-    for k in heads:
-        if(str(k).__contains__("Salario Base")):
-            Validador = True
-        if(Validador):
-            Horizontal[k] = Horizontal[k].astype('float')
-            FilaAgregar[k] = sum(Horizontal[k])
-    Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
+    # for k in heads:
+    #     if(str(k).__contains__("Salario basico")):
+    #         Validador = True
+    #     if(Validador):
+    #         Horizontal[k] = Horizontal[k].astype('float')
+    #         FilaAgregar[k] = sum(Horizontal[k])
+    # Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
 
     
     wb = Workbook()
@@ -442,7 +457,9 @@ def procesar(df1, IdProceso):
 
 
     Horizontal = pd.DataFrame(ws.values)
-    writer = pd.ExcelWriter(DirectoryReporteHorizontal+NombreDocumento+".xlsx", engine='xlsxwriter')
+    
+    writer = pd.ExcelWriter(NombreDocumento+".xlsx", engine='xlsxwriter')
+    # writer = pd.ExcelWriter(DirectoryReporteHorizontal+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='PRENOMINA',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["PRENOMINA"]    
@@ -502,7 +519,12 @@ def procesar(df1, IdProceso):
         worksheet.write_string(MaxFilas, contador,Dato)
         contador += 1
     writer.close()
-    return NombreDocumento+".xlsx"
+    archivos_para_comprimir = [NombreDocumento+".xlsx",resumen_]
+    nombre_ = "Reportes.zip"
+    comprimir_archivos(archivos_para_comprimir, DirectoryReporteHorizontal + nombre_)
+    for archivos in archivos_para_comprimir:
+        os.remove(archivos)
+    return nombre_
 
 # Validar que tenga contenido los ID 
 def validar_contenido_id():  

@@ -1,20 +1,8 @@
 // Almacenar objeto de funciones de enrutamiento - pertenece a router
 const prenominaController = {}
 const { dirname,join } = require('path');
-const { fileURLToPath } = require('url');
 // Variables compartidas
-const fs = require('fs');
 const spawn = require("child_process").spawn;
-const utf8 = require('utf8');
-// Variables Reporte Nomina, LQ y ReLQ
-const XLSX = require('xlsx');
-var Nombre_Horizontal = "";
-var Lista_nombres = [];
-// Constantes Archivo TxtSS
-var Nombre_txt = "";
-// Directories Horizontal
-PythonReporteHorizontal = "./src/python/ReporteEspecialDHL.py";
-DescargaReporteHorizontal = './src/database/';
 
 // Reporte Horizontal
 prenominaController.generarPrenomina = (req, res) => {

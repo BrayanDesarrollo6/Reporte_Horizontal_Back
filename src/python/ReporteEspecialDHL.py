@@ -2,25 +2,22 @@ import sys
 import zipfile36 as zipfile
 import pandas as pd
 import numpy as np
-import json
 import xlsxwriter
-from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
-from openpyxl.drawing.image import Image
-import requests
 import os
 from io import BytesIO
-from Directories.Directory import DirectoryReporteHorizontal
 from Prenomina.accessToken import funcionesGenerales
 from resumenDHL import resumen
+from Directories.Directory import DirectoryReporteEspecialDHL
 
+# Comprimir archivos
 def comprimir_archivos(archivos, archivo_zip):
     with zipfile.ZipFile(archivo_zip, 'w') as zipf:
         for archivo in archivos:
             zipf.write(archivo, os.path.basename(archivo))
+            
 # reemplazar acentos
 def normalize(s):
     replacements = (
@@ -30,6 +27,7 @@ def normalize(s):
     for a, b in replacements:
         s = s.replace(a, b).replace(a.upper(), b.upper())
     return s
+
 # reemplazar caracteres
 def replacement(name_company):
     name_company = name_company.replace(".", "")
@@ -37,6 +35,7 @@ def replacement(name_company):
     name_company = name_company.replace("–", "_")
     name_company = name_company.replace("—", "_")
     return name_company
+
 # Mes name
 def mesName(mes):
     mes_ = "Enero"
@@ -63,8 +62,9 @@ def mesName(mes):
     elif (mes == "12"):
         mes_ = "Diciembre"
     return mes_   
+
 def custom_xl_col_to_name(col):
-    return str(col + 1)  # Sumar 1 ya que los índices de las columnas comienzan desde 1 en Excel
+    return str(col + 1)
 def hour_to_day(horas,horas_mes):
     return (horas /(horas_mes))
 def horas_df(df,columna):
@@ -84,6 +84,7 @@ def separar_texto(texto):
         primera_palabra = ""
         segunda_palabra = ""
     return primera_palabra,segunda_palabra
+
 # Función secundaria 
 def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar = {}
@@ -101,7 +102,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     if(str(ContratoPos.iloc[0]['Tipo de Jornada']) == "Jornada Laboral 190 Horas"):
         horasDia_ = 6.33
         
-    ##Informacion general inicial
+    # Informacion general inicial
     FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
     tipoPeriodo_ = "1Q"
     if(ContratoPos.iloc[0]['Tipo de Perido'] == "2"):
@@ -133,7 +134,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Tipo contrato"] = ContratoPos.iloc[0]['Tipo de Contrato']
     FilaAgregar["Salario basico"] = (float(ContratoPos.iloc[0]['Salario Base']))
     FilaAgregar["Dias Salario (pagos nómina)"] = ContratoPos.iloc[0]['Días Trabajados']
-    #HASTA AQUI NARANJA
+    # HASTA AQUI NARANJA
     FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = 0
     FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = 0
     FilaAgregar["Grupo # 3\nDias ausencias injustificadas, sanciones, dominical, Licencia No Remunerada"] = 0
@@ -398,6 +399,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Total Neto Factura"] = FilaAgregar["Subtotal factura suppla"] + FilaAgregar["Iva del 19%"]
     Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
     return Horizontal  
+
 # Funcion principal
 def procesar(df1, IdProceso):
     global aiu
@@ -406,7 +408,8 @@ def procesar(df1, IdProceso):
     Contrato  = df1['Numero de Contrato'].unique().tolist()
     IDPeriodo = df1['ID Periodo'].tolist()
     IDPeriodo = np.unique(IDPeriodo)
-    #Obtener información para agregar al nuevo data frame
+    
+    # Obtener información para agregar al nuevo data frame
     for j in IDPeriodo:
         for i in Contrato:
             Valores = df1['Numero de Contrato'] == str(i)
@@ -440,31 +443,19 @@ def procesar(df1, IdProceso):
     FilaAgregar = {}
     Validador = False
     
-    # for k in heads:
-    #     if(str(k).__contains__("Salario basico")):
-    #         Validador = True
-    #     if(Validador):
-    #         Horizontal[k] = Horizontal[k].astype('float')
-    #         FilaAgregar[k] = sum(Horizontal[k])
-    # Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
-
-    
     wb = Workbook()
     ws = wb.active
 
     for r in dataframe_to_rows(Horizontal, index=False, header=True):
         ws.append(r)
 
-
     Horizontal = pd.DataFrame(ws.values)
     
-    writer = pd.ExcelWriter(NombreDocumento+".xlsx", engine='xlsxwriter')
-    # writer = pd.ExcelWriter(DirectoryReporteHorizontal+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(DirectoryReporteEspecialDHL + NombreDocumento+".xlsx", engine='xlsxwriter')
+    
     Horizontal.to_excel(writer, sheet_name='PRENOMINA',index = False, header = False)
     workbook = writer.book
     worksheet = writer.sheets["PRENOMINA"]    
-    # default_format = workbook.add_format({'font_name': 'Calibri Light'})
-    # worksheet.set_column(0, len(heads) - 1, None, default_format) 
     MaxFilas = len(Horizontal.axes[0])
     Totales = Horizontal.loc[MaxFilas -1]
     
@@ -487,6 +478,7 @@ def procesar(df1, IdProceso):
     (155, 158): '#D7F5FA',
     (159, 159): '#FAE9D7'
     }
+    
     # Escribir encabezados en la primera fila
     contador = 0
     for k in heads:
@@ -505,6 +497,7 @@ def procesar(df1, IdProceso):
                 break
         contador += 1
     worksheet.set_row(0, 80)
+    
     # Ajustar automáticamente el ancho de las columnas según el contenido
     for i, heading in enumerate(heads):
         column_values = Horizontal.iloc[:, i].astype(str)
@@ -521,7 +514,7 @@ def procesar(df1, IdProceso):
     writer.close()
     archivos_para_comprimir = [NombreDocumento+".xlsx",resumen_]
     nombre_ = "Reportes.zip"
-    comprimir_archivos(archivos_para_comprimir, DirectoryReporteHorizontal + nombre_)
+    comprimir_archivos(archivos_para_comprimir, DirectoryReporteEspecialDHL + nombre_)
     for archivos in archivos_para_comprimir:
         os.remove(archivos)
     return nombre_
@@ -552,6 +545,7 @@ def validar_contenido_id():
     else:
         Documento_one = procesar(df1, IdProceso)
         print(Documento_one)  
+        
 # Si llegó mas de un ID primero válide la empresa usuaria
 def validar_empresa():
     if(estado == '2'):

@@ -12,6 +12,8 @@ DirectoryReporteHorizontal = "./src/database/"
 DirectoryReporteLiquidaciones = "./src/database/"
 DirectoryReporteReLiquidaciones = "./src/database/"
 DirectoryReporteTxt = "./src/database/"
+DirectoryResumenDHL = "./src/database/"
+DirectoryReporteEspecialDHL = "./src/database/"
 
 # Formatos
 DirectoryFormatoOrdenIngreso = "./src/database/formatoOrdenIngreso.xlsx"
@@ -32,6 +34,8 @@ DirectoryReporteHorizontal = "./database/"
 DirectoryReporteLiquidaciones = "./database/"
 DirectoryReporteReLiquidaciones = "./database/"
 DirectoryReporteTxt = "./database/"
+DirectoryResumenDHL = ""
+DirectoryReporteEspecialDHL = ""
 
 # Formatos
 DirectoryFormatoOrdenIngreso = "./database/formatoOrdenIngreso.xlsx"

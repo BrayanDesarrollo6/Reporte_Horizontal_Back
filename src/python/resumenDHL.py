@@ -1,13 +1,10 @@
 import pandas as pd
-import numpy as np
 import xlsxwriter
 from openpyxl import Workbook
-from datetime import datetime
 from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
-from openpyxl.drawing.image import Image
 from io import BytesIO
+from Directories.Directory import DirectoryResumenDHL
+
 class resumen():
     # reemplazar acentos
     def normalize(self,s):
@@ -108,11 +105,9 @@ class resumen():
         valorDescuentos_ = sum(dfEmpleado[f"{tipo}"].values[0] for tipo in descuentos_)
         FilaAgregar["DeduccionesEmpledos"] = valorDescuentos_
         # PRESTACIONES
-        
         FilaAgregar["PrestacionesSociales"] = dfEmpleado["Valor prestaciones sociales"].values[0] 
         FilaAgregar["SeguridadSocialyParafiscales"] = dfEmpleado["Valor parafiscales"].values[0]  + dfEmpleado["Total Seguridad Social"].values[0]
         FilaAgregar["Admon"] = dfEmpleado["Administración temporales (el % que tenga cada temporal)"].values[0] 
-        
         # TOTAL PRENOMINA
         valores_ = [
             "Salario",
@@ -129,15 +124,14 @@ class resumen():
         FilaAgregar["TotalPrenomina"] = valorTotal_
         Horizontal = pd.concat([Horizontal,pd.DataFrame.from_records([FilaAgregar])],ignore_index=True)
         return Horizontal 
-    def generarResumen(self,df):
-        
+    
+    def generarResumen(self,df):    
         Horizontal = pd.DataFrame()
         Contrato  = df['Cedula'].unique().tolist()
         for i in Contrato:
             Valores = df['Cedula'] == i
             ContratoPos = df[Valores]
             Horizontal = self.generarrow(ContratoPos, Horizontal)
-        # Horizontal.to_excel("PRuebaa.xlsx", sheet_name='RESUMEN',index = False, header = False)
         NombreDocumento = "Publicacion " + str(df.iloc[0]['Empresa a la que se le factura']) +"-"+ str(df.iloc[0]['Mes'])
         # Normalizar nombre del documento
         NombreDocumento = self.normalize(NombreDocumento)
@@ -146,20 +140,13 @@ class resumen():
         
         wb = Workbook()
         ws = wb.active
-        # # Obtener las filas del DataFrame con las etiquetas de columna
-        # rows = dataframe_to_rows(Horizontal, index=False, header=True)
-
-        # # Agregar las filas al worksheet, incluyendo las etiquetas de columna
-        # for r_idx, row in enumerate(rows, 1):
-        #     for c_idx, value in enumerate(row, 1):
-        #         ws.cell(row=r_idx, column=c_idx, value=value)
+        
         for r in dataframe_to_rows(Horizontal, index=False, header=True):
             ws.append(r)
 
-
         Horizontal = pd.DataFrame(ws.values)
-        writer = pd.ExcelWriter(NombreDocumento+".xlsx", engine='xlsxwriter')
-        # writer = pd.ExcelWriter(DirectoryReporteHorizontal+NombreDocumento+".xlsx", engine='xlsxwriter')
+        writer = pd.ExcelWriter(DirectoryResumenDHL+NombreDocumento+".xlsx", engine='xlsxwriter')
+        
         Horizontal.to_excel(writer, sheet_name='RESUMEN',index = False, header = False)
         workbook = writer.book
         worksheet = writer.sheets["RESUMEN"]    

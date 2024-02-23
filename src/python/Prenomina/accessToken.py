@@ -3,7 +3,9 @@ import time
 import requests
 import os
 import json
+
 class funcionesGenerales():
+    
     def conectarBD(self):
         try:
             conexion = mysql.connector.connect(
@@ -16,6 +18,7 @@ class funcionesGenerales():
             return conexion
         except mysql.connector.Error as err:
             return None
+        
     def get_registro(self,tabla,campos, condiciones):
         conexion = self.conectarBD()
         try:
@@ -36,6 +39,7 @@ class funcionesGenerales():
             if conexion.is_connected():
                 cursor.close()
                 conexion.close()
+                
     def get_OneOrder(self,tabla,campos,order, condiciones):
         conexion = self.conectarBD()
         if conexion:
@@ -60,6 +64,7 @@ class funcionesGenerales():
                 if conexion.is_connected():
                     cursor.close()
                     conexion.close()
+                    
     def access_token_zoho(self,id):
         resultados_ = self.get_registro("refreshToken_zoho",["id","refresh"],[f"id ={id}"])
         # https://accounts.zoho.com/oauth/v2/token?client_id=1000.IR8Z2X49OOIDKTKJ6V061D695UZSAA&grant_type=refresh_token&client_secret=304f1af84b8d1cf7e9e13906ef481a7c3864c7c4f0&refresh_token=1000.2a42b5c8b8bde22c60272a117dda6fdf.0043c9f3e25b99a7bc9ccddc18bb677d
@@ -90,6 +95,7 @@ class funcionesGenerales():
             return posts['access_token']
         
         return None
+    
     def add_register(self,tabla,columnas,valores):
     
         conexion = self.conectarBD()
@@ -124,6 +130,7 @@ class funcionesGenerales():
         headers = {
             "Authorization": f"Zoho-oauthtoken {token}"
         }
+        
         with open(file_path, "rb") as file:
             files = {"file": file}
             response = requests.post(url, headers=headers, files=files)
@@ -139,6 +146,7 @@ class funcionesGenerales():
                 header = {"Authorization":"Zoho-oauthtoken "+token, "Access-Control-Allow-Origin": "*"} 
                 r = requests.post(url_,data=Datos_,headers=header)
                 print(r.json())
+                
     def getAIU(self,nameCliente):
 
         resultados_ = self.get_registro("refreshToken_zoho",["id","refresh"],["usuario = 'desarrollo3@hq5.com.co'"])

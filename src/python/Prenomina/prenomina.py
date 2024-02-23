@@ -17,13 +17,16 @@ from io import BytesIO
 import sys
 import cv2
 import asyncio
+
 #Importar funciones para obtener BD
 from accessToken import funcionesGenerales
+
 # Objeto de borde
 border = Border(left=Side(style='thin'), 
                 right=Side(style='thin'), 
                 top=Side(style='thin'), 
                 bottom=Side(style='thin'))
+
 # reemplazar acentos
 def normalize(s):
     replacements = (
@@ -250,6 +253,7 @@ def add_devengos(ws):
         title_cell.border = border
         contador_ += 1
     return ws
+  
 def add_deducciones(ws):
     contador_ = 0
     for x in range(25,31):
@@ -272,6 +276,7 @@ def add_deducciones(ws):
         title_cell.border = border
         contador_ += 1
     return ws
+  
 def add_ausentismos(ws):
     contador_ = 0
     title_cell = ws.cell(row=1, column=31)
@@ -305,6 +310,7 @@ def add_ausentismos(ws):
     title_cell.value = value
     title_cell.border = border
     return ws
+  
 def create_workbook_and_sheet(df):
     wb = Workbook()
     ws = wb.active
@@ -403,7 +409,6 @@ def procesar(prenomina_zoho):
         ContratoPos = prenomina_zoho[Valores]
         Horizontal = generar_row(ContratoPos,Horizontal)
         
-        
     #Nombre documento
     Empresa_ = prenomina_zoho.iloc[0]['Empresa']
     NombreDocumento = "Prenomina_" + Empresa_
@@ -420,8 +425,8 @@ def procesar(prenomina_zoho):
     add_images(ws)
     add_info_customer(ws,prenomina_zoho)
 
+    # Puede generar error
     wb.save("./src/"+NombreDocumento+".xlsx")
-    
     funcionesGenerales().updatedata("./src/"+NombreDocumento+".xlsx",IDregistro_)
   
 def procesar_prenomina(data):
@@ -565,9 +570,7 @@ def procesar_prenomina(data):
         print("No existe registro")
     else:
         print("Existe y se esta procesando")
-        procesar(df1)
-        # Documento_one = procesar(df1,df3)
-        # print(Documento_one)  
+        procesar(df1) 
         
 def main():
     info_received = sys.argv[1]

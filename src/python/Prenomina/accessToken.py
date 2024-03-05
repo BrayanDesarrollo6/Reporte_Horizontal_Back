@@ -78,8 +78,8 @@ class funcionesGenerales():
         url = 'https://accounts.zoho.com/oauth/v2/token'
         data = {
             'grant_type': 'refresh_token',
-            'client_id': '1000.IR8Z2X49OOIDKTKJ6V061D695UZSAA',
-            'client_secret': '304f1af84b8d1cf7e9e13906ef481a7c3864c7c4f0',
+            'client_id': '1000.1X8CFKQHNVMIQYBM2LD5D630UAMMXB',
+            'client_secret': 'ed77d9ad812478a75cb46e11db1bbc262b8f1d49bf',
             'refresh_token':resultados_[0]['refresh']
         }
         resp = requests.post(url, data=data)

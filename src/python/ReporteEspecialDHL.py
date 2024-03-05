@@ -72,6 +72,7 @@ def horas_df(df,columna):
 def dias_df(df,columna,horasDia_):
     return hour_to_day(abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum()),horasDia_)
 def valor_df(df,columna):
+    columna = ('["'+columna+'"]')
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum())
 def valor_negativo_df(df,columna):
     return df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum()

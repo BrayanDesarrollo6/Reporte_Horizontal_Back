@@ -118,7 +118,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Cost center"] = cost
     FilaAgregar["Cost center name"] = cost_name
     FilaAgregar["City - población"] = str(ContratoPos.iloc[0]['Ciudad'])
-    cu_name , cu = separar_texto(str(ContratoPos.iloc[0]['Proyecto - CU']))
+    cu , cu_name = separar_texto(str(ContratoPos.iloc[0]['Centro de Costo']))
     FilaAgregar["Cu (customer -cliente)"] = cu
     FilaAgregar["Cu name"] = cu_name
     at_name , at = separar_texto(str(ContratoPos.iloc[0]['Naturaleza Centro Costo - AT']))
@@ -512,7 +512,7 @@ def procesar(df1, IdProceso):
         worksheet.write_string(MaxFilas, contador,Dato)
         contador += 1
     writer.close()
-    archivos_para_comprimir = [NombreDocumento+".xlsx",resumen_]
+    archivos_para_comprimir = [DirectoryReporteEspecialDHL + NombreDocumento+".xlsx",resumen_]
     nombre_ = "Reportes.zip"
     comprimir_archivos(archivos_para_comprimir, DirectoryReporteEspecialDHL + nombre_)
     for archivos in archivos_para_comprimir:

@@ -113,8 +113,9 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     mes = mesName( ContratoPos.iloc[0]['Mes'])
     FilaAgregar["Mes"] = f"{tipoPeriodo_} {mes} {ContratoPos.iloc[0]['Año']}"
     FilaAgregar["No. factura"] = "0"
-    FilaAgregar["Codigo compañía"] = ContratoPos.iloc[0]['Código del cliente']
-    FilaAgregar["Empresa a la que se le factura"] = "SUPPLA"
+    codigo_comp , name_comp = separar_texto(str(ContratoPos.iloc[0]['Empresa asociada']))
+    FilaAgregar["Codigo compañía"] = codigo_comp
+    FilaAgregar["Empresa a la que se le factura"] = name_comp
     cost_name , cost = separar_texto(str(ContratoPos.iloc[0]['Sub centro de costo - Cost center']))
     FilaAgregar["Cost center"] = cost
     FilaAgregar["Cost center name"] = cost_name

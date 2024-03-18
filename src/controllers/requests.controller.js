@@ -324,8 +324,8 @@ requestsController.formatoOrdenIngreso = (req, res) => {
     }
 }
 
-//Funcion para generar el archivo de formato facturacion examenes medicos
-requestsController.formatoFacturacionExamenes = (req, res) => {
+//Funcion para generar el archivo de formato ordenes dhl
+requestsController.formatoOrdenDHL = (req, res) => {
     const { body } = req;
     const jsonString = JSON.stringify(body);
     // Condicionales

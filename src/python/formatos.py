@@ -2,7 +2,6 @@ import sys
 import json
 from Access.Getaccess import *
 import Formatos.formatoOrdenIngreso as process_orden_ingreso
-import Formatos.formatoFacturacionExamen as process_facturacion_examen
 import Formatos.formatoOrdenDHL as process_orden_dhl
 from Formatos.fileUploadOrdenIngreso import updatedata
 from Formatos.fileUpload import Updatedata
@@ -16,7 +15,6 @@ def procesar_formato(data):
 
         formatos = {
             "orden_ingreso": process_orden_ingreso,
-            "facturacion_examen" : process_facturacion_examen,
             "orden_dhl": process_orden_dhl,
         }
 
@@ -31,7 +29,7 @@ def procesar_formato(data):
             if access_token:
                     if formato == "orden_ingreso":
                         updatedata(access_token,file_path,record_id)
-                    elif formato == "facturacion_examen" or formato == "orden_dhl":
+                    elif formato == "orden_dhl":
                         report = json_object['data']['formato']['reporte']
                         field = json_object['data']['formato']['campo']
                         Updatedata(access_token,file_path,record_id,report,field)

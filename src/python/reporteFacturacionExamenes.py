@@ -29,12 +29,12 @@ def get_df(data):
     return df
 
 def tranform_df(df):
+    default_columns = df.shape[1]-2
     df['FECHA'] = df['FECHA'].dt.strftime('%d-%m-%Y')
-
     nuevo_df = df.pivot_table(index='ID PROGRAMACION', columns='Examen medico', values='Valor', fill_value=0, aggfunc='first')
     nuevo_df = pd.merge(df.drop(columns=['Examen medico', 'Valor']).drop_duplicates(),nuevo_df, on='ID PROGRAMACION')
 
-    columnas_examenes = nuevo_df.columns[9:]
+    columnas_examenes = nuevo_df.columns[default_columns:]
     nuevo_df['Total Exámenes'] = nuevo_df[columnas_examenes].sum(axis=1)
     
     total = [''] * len(nuevo_df.columns)
@@ -50,7 +50,7 @@ def df_to_excel(df):
 def apply_excel_styles(file_name):
     wb = openpyxl.load_workbook(file_name)
     sheet = wb.active
-    header_color = '1c8817'
+    header_color = '024715'
     
     #header color
     for fila in sheet.iter_rows(min_row=1, max_row=1):

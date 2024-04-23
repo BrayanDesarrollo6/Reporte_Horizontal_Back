@@ -38,30 +38,21 @@ def replacement(name_company):
 
 # Mes name
 def mesName(mes):
-    mes_ = "Enero"
-    if(mes == "2"):
-        mes_ = "Febrero"
-    elif (mes == "3"):
-        mes_ = "Marzo"
-    elif (mes == "4"):
-        mes_ = "Abril"
-    elif (mes == "5"):
-        mes_ = "Mayo"
-    elif (mes == "6"):
-        mes_ = "Junio"
-    elif (mes == "7"):
-        mes_ = "Julio"
-    elif (mes == "8"):
-        mes_ = "Agosto"
-    elif (mes == "9"):
-        mes_ = "Septiembre"
-    elif (mes == "10"):
-        mes_ = "Octubre"
-    elif (mes == "11"):
-        mes_ = "Noviembre"
-    elif (mes == "12"):
-        mes_ = "Diciembre"
-    return mes_   
+    meses_={
+        "1":"Enero",
+        "2":"Febrero",
+        "3":"Marzo",
+        "4":"Abril",
+        "5":"Mayo",
+        "6":"Junio",
+        "7":"Julio",
+        "8":"Agosto",
+        "9":"Septiembre",
+        "10":"Octubre",
+        "11":"Noviembre",
+        "12":"Diciembre"
+    }
+    return meses_[mes]   
 
 def custom_xl_col_to_name(col):
     return str(col + 1)
@@ -106,15 +97,16 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     # Informacion general inicial
     FilaAgregar["Temporal"] = ContratoPos.iloc[0]['Temporal']
     tipoPeriodo_ = "1Q"
-    if(ContratoPos.iloc[0]['Tipo de Perido'] == "2"):
+    if(str(ContratoPos.iloc[0]['Tipo de Perido']) == "2"):
         tipoPeriodo_ = "2Q"
-    if(ContratoPos.iloc[0]['Tipo de Perido'] == "3"):
+    if(str(ContratoPos.iloc[0]['Tipo de Perido']) == "3"):
         tipoPeriodo_ = "M"
-    mes = mesName( ContratoPos.iloc[0]['Mes'])
+    mes = mesName( str(ContratoPos.iloc[0]['Mes']))
     FilaAgregar["Mes"] = f"{tipoPeriodo_} {mes} {ContratoPos.iloc[0]['Año']}"
     FilaAgregar["No. factura"] = "0"
-    FilaAgregar["Codigo compañía"] = ContratoPos.iloc[0]['Código del cliente']
-    FilaAgregar["Empresa a la que se le factura"] = "SUPPLA"
+    codigo_comp , name_comp = separar_texto(str(ContratoPos.iloc[0]['Empresa asociada']))
+    FilaAgregar["Codigo compañía"] = codigo_comp
+    FilaAgregar["Empresa a la que se le factura"] = name_comp
     cost_name , cost = separar_texto(str(ContratoPos.iloc[0]['Sub centro de costo - Cost center']))
     FilaAgregar["Cost center"] = cost
     FilaAgregar["Cost center name"] = cost_name

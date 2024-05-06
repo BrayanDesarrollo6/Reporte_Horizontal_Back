@@ -67,15 +67,14 @@ def valor_df(df,columna):
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum())
 def valor_negativo_df(df,columna):
     return df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum()
+
+# Funcion separar texto
 def separar_texto(texto):
-    if texto and texto != "nan":
-        partes = texto.split(" - ")
-        primera_palabra = partes[0]
-        segunda_palabra = partes[1]
-    else:
-        primera_palabra = ""
-        segunda_palabra = ""
-    return primera_palabra,segunda_palabra
+    if texto and texto != "nan" and " - " in texto:
+        partes = texto.split(" - ", 1)
+        if len(partes) == 2:
+            return partes
+    return ("", "")
 
 # Función secundaria 
 def generar_dataframe_horizontal(ContratoPos, Horizontal):

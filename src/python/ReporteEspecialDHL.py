@@ -57,19 +57,26 @@ def mesName(mes):
 def custom_xl_col_to_name(col):
     return str(col + 1)
 def hour_to_day(horas,horas_mes):
-    return (horas /(horas_mes))
+    return round(horas /(horas_mes))
 def horas_df(df,columna):
     columna = ('["'+columna+'"]')
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum())
 def dias_df(df,columna,horasDia_):
     columna = ('["'+columna+'"]')
-    return hour_to_day(abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum()),horasDia_)
+    return hour_to_day(abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna), 'Horas'].sum()),horasDia_)
 def valor_df(df,columna):
     columna = ('["'+columna+'"]')
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum())
 def valor_negativo_df(df,columna):
     columna = ('["'+columna+'"]')
     return df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum()
+def valor_negativoNetocero_df(df,columna,horasDia_):
+    columna = ('["'+columna+'"]')
+    horas =  df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Horas'] != 0), 'Horas'].sum()
+    SalarioBase_ = (float(df.iloc[0]['Salario Base']))
+    SalarioDiario_ = (SalarioBase_ / 30) / horasDia_
+    
+    return SalarioDiario_ * horas
 
 # Funcion separar texto
 def separar_texto(texto):
@@ -300,14 +307,14 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Grupo #1 Total días ausencias justificadas con reconocimiento"] = diasGrupo1_
     FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] = valorGrupo1_
     # EMPIEZA GRUPO 3
-    FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = dias_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_)
-    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_negativo_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH")
+    FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = dias_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_) 
+    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_negativoNetocero_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_)
     FilaAgregar["Días Suspensión (originada Sanción)"] = dias_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
-    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_negativo_df(ContratoPos,"Suspensión (originada Sanción)")
+    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
     FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] = dias_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
-    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_negativo_df(ContratoPos,"Dominical por Suspensión (Inasistencia)")
+    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
     FilaAgregar["Días Inasistencia injustificada"] = dias_df(ContratoPos,"Inasistencia injustificada",horasDia_)
-    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_negativo_df(ContratoPos,"Inasistencia injustificada")
+    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_negativoNetocero_df(ContratoPos,"Inasistencia injustificada",horasDia_)
     # TOTALIZAR GRUPO 3
     diasGrupo3_ = FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] + FilaAgregar["Días Suspensión (originada Sanción)"] + FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] + FilaAgregar["Días Inasistencia injustificada"]
     valorGrupo3_ = FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] + FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] + FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] + FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"]
@@ -367,10 +374,10 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Iva del 19%"] = 0
     FilaAgregar["Total Neto Factura"] = 0
     FilaAgregar["Justificación (para casos puntuales que se requieran detallar)"] = ""
-    FilaAgregar["Dcto my v/r pagado salario/Saldo en rojo"] = valor_negativo_df(ContratoPos,"Dcto my v/r pagado salario/Saldo en rojo")
-    FilaAgregar["Saldo reconocido por el cliente"] = valor_negativo_df(ContratoPos,"Saldo reconocido por el cliente")
-    FilaAgregar["DEDUCCIONES VARIAS - NC"] = valor_negativo_df(ContratoPos,"DEDUCCIONES VARIAS - NC")
-    FilaAgregar["Deduccion Casino"] = valor_negativo_df(ContratoPos,"Deducicon Casino")
+    FilaAgregar["Dcto my v/r pagado salario/Saldo en rojo"] = valor_negativoNetocero_df(ContratoPos,"Dcto my v/r pagado salario/Saldo en rojo",horasDia_)
+    FilaAgregar["Saldo reconocido por el cliente"] = valor_negativoNetocero_df(ContratoPos,"Saldo reconocido por el cliente",horasDia_)
+    FilaAgregar["DEDUCCIONES VARIAS - NC"] = valor_negativoNetocero_df(ContratoPos,"DEDUCCIONES VARIAS - NC",horasDia_)
+    FilaAgregar["Deduccion Casino"] = valor_negativoNetocero_df(ContratoPos,"Deducicon Casino",horasDia_)
     exedente_ = 0
     ssLey_ = 0
     if(str(ContratoPos.iloc[0]['Excedente seguridad social']) != "nan"):

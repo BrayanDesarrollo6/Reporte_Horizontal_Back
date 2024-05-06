@@ -135,7 +135,8 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Estado"] = ContratoPos.iloc[0]['Estado Trabajador']
     FilaAgregar["Tipo contrato"] = ContratoPos.iloc[0]['Tipo de Contrato']
     FilaAgregar["Salario basico"] = (float(ContratoPos.iloc[0]['Salario Base']))
-    FilaAgregar["Dias Salario (pagos nómina)"] = ContratoPos.iloc[0]['Días Trabajados']
+    # FilaAgregar["Dias Salario (pagos nómina)"] = ContratoPos.iloc[0]['Días Trabajados']
+    FilaAgregar["Dias Salario (pagos nómina)"] = dias_df(ContratoPos,"Valor Salario",horasDia_)
     # HASTA AQUI NARANJA
     FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = 0
     FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = 0

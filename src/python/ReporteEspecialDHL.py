@@ -220,8 +220,8 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Días Vacaciones en Disfrute Anticipadas"] = dias_df(ContratoPos,"Vacaciones en Disfrute Anticipadas",horasDia_)
     FilaAgregar["Valor Vacaciones en Disfrute Anticipadas"] = valor_df(ContratoPos,"Vacaciones en Disfrute Anticipadas")
     # Realizar suma para licencia remunerada
-    diasLicencia_ = dias_df(ContratoPos,"Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)",horasDia_)
-    valorLicencia_ = valor_df(ContratoPos,"Permiso Personal sin Reposición de tiempo por (de 1 o 2 Días)")
+    diasLicencia_ = dias_df(ContratoPos,"Licencia Remunerado",horasDia_)
+    valorLicencia_ = valor_df(ContratoPos,"Licencia Remunerado")
     if(diasLicencia_ > 2):
         # valor dia
         valordiaLicencia_ = valorLicencia_ / diasLicencia_
@@ -303,6 +303,8 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
         diasGrupo1_ += FilaAgregar[columna]
     for columna in columnas_valor_grupo1:
         valorGrupo1_ += FilaAgregar[columna]
+    #SUMAR DIAS INCAPACIDAD 1 Y 2
+    diasGrupo1_ += FilaAgregar["Días incapacidad enfermedad general (Días 1 y 2)"]
     # TOTAL
     FilaAgregar["Grupo #1 Total días ausencias justificadas con reconocimiento"] = diasGrupo1_
     FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] = valorGrupo1_

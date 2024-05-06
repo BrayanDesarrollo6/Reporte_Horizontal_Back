@@ -59,13 +59,16 @@ def custom_xl_col_to_name(col):
 def hour_to_day(horas,horas_mes):
     return (horas /(horas_mes))
 def horas_df(df,columna):
+    columna = ('["'+columna+'"]')
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum())
 def dias_df(df,columna,horasDia_):
+    columna = ('["'+columna+'"]')
     return hour_to_day(abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Horas'].sum()),horasDia_)
 def valor_df(df,columna):
     columna = ('["'+columna+'"]')
     return abs(df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum())
 def valor_negativo_df(df,columna):
+    columna = ('["'+columna+'"]')
     return df.loc[ (df['Parametrizacion reportes especiales'] == columna) & (df['Neto'] > 0), 'Neto'].sum()
 
 # Funcion separar texto

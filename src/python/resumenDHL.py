@@ -4,7 +4,9 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from io import BytesIO
 from Directories.Directory import DirectoryResumenDHL
-
+import warnings
+# Deshabilitar las advertencias de openpyxl temporalmente
+warnings.filterwarnings("ignore", message="Workbook contains no default style, apply openpyxl's default")
 class resumen():
     # reemplazar acentos
     def normalize(self,s):

@@ -11,7 +11,9 @@ from io import BytesIO
 from Prenomina.accessToken import funcionesGenerales
 from resumenDHL import resumen
 from Directories.Directory import DirectoryReporteEspecialDHL
-
+import warnings
+# Deshabilitar las advertencias de openpyxl temporalmente
+warnings.filterwarnings("ignore", message="Workbook contains no default style, apply openpyxl's default")
 # Comprimir archivos
 def comprimir_archivos(archivos, archivo_zip):
     with zipfile.ZipFile(archivo_zip, 'w') as zipf:
@@ -362,7 +364,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     # ASIGNAR PROVISIONES
     FilaAgregar["Cesantias 8,33%"] = (cesantias_)
     FilaAgregar["Int. cesantias 1%"] = (interes_)
-    FilaAgregar["Prima 8,33%"] = (vacaciones_)
+    FilaAgregar["Prima 8,33%"] = (prima_)
     FilaAgregar["Vacaciones 4.1667%"] = (vacaciones_)
     prestacionesSociales_ = cesantias_ + interes_ + prima_ + vacaciones_
     FilaAgregar["Valor prestaciones sociales"] = ( prestacionesSociales_ )
@@ -393,6 +395,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     FilaAgregar["Grupo # 1\nDias ausencias justificadas con reconocimiento $ (calamidad, permisos justificados, lic, remunerada, incapacidad dia 1 y 2)"] = diasGrupo1_
     FilaAgregar["Grupo # 2\nDias ausencias justificadas sin cobro (vac. habiles, incapaidad del dia 3 en adelante, lic, maternidad y paternidad)"] = diasGrupo2_
     FilaAgregar["Grupo # 3\nDias ausencias injustificadas, sanciones, dominical, Licencia No Remunerada"] = diasGrupo3_
+    FilaAgregar["Total días de liquidación (mes o quincena)"] = diasGrupo1_ + diasGrupo2_ +  diasGrupo3_ + dias_df(ContratoPos,"Valor Salario",horasDia_)
     # ASIGNAR VALORES FINALES 
     FilaAgregar["Examenes medicos  servicios"] = 0
     FilaAgregar["Menos servicio de alimentacion"] = 0
@@ -510,19 +513,19 @@ def procesar(df1, IdProceso):
         column_width = max(len(str(heading)), len(max_value))
         worksheet.set_column(i, i, column_width + 2)
     contador = 0
-    for k in Totales:
-        Dato = ""
-        if(str(k) != "nan"):
-            Dato = str(k)
-        worksheet.write_string(MaxFilas, contador,Dato)
-        contador += 1
+    # for k in Totales:
+    #     Dato = ""
+    #     if(str(k) != "nan"):
+    #         Dato = str(k)
+    #     worksheet.write_string(MaxFilas, contador,Dato)
+    #     contador += 1
     writer.close()
     archivos_para_comprimir = [DirectoryReporteEspecialDHL + NombreDocumento+".xlsx",resumen_]
     nombre_ = "Reportes.zip"
     comprimir_archivos(archivos_para_comprimir, DirectoryReporteEspecialDHL + nombre_)
-    for archivos in archivos_para_comprimir:
-        os.remove(archivos)
-    return nombre_
+    # for archivos in archivos_para_comprimir:
+    #     os.remove(archivos)
+    # return nombre_
 
 # Validar que tenga contenido los ID 
 def validar_contenido_id():  

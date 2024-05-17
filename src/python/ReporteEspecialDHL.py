@@ -523,9 +523,9 @@ def procesar(df1, IdProceso):
     archivos_para_comprimir = [DirectoryReporteEspecialDHL + NombreDocumento+".xlsx",resumen_]
     nombre_ = "Reportes.zip"
     comprimir_archivos(archivos_para_comprimir, DirectoryReporteEspecialDHL + nombre_)
-    # for archivos in archivos_para_comprimir:
-    #     os.remove(archivos)
-    # return nombre_
+    for archivos in archivos_para_comprimir:
+        os.remove(archivos)
+    return nombre_
 
 # Validar que tenga contenido los ID 
 def validar_contenido_id():  

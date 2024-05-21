@@ -308,18 +308,27 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
         valorGrupo1_ += FilaAgregar[columna]
     #SUMAR DIAS INCAPACIDAD 1 Y 2
     diasGrupo1_ += FilaAgregar["Días incapacidad enfermedad general (Días 1 y 2)"]
+    valorGrupo1_ += FilaAgregar["Valor incapacidad enfermedad general (Días 1 y 2)"]
     # TOTAL
     FilaAgregar["Grupo #1 Total días ausencias justificadas con reconocimiento"] = diasGrupo1_
     FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] = valorGrupo1_
     # EMPIEZA GRUPO 3
+    # FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = dias_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_) 
+    # FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_negativoNetocero_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_)
+    # FilaAgregar["Días Suspensión (originada Sanción)"] = dias_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
+    # FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
+    # FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] = dias_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
+    # FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
+    # FilaAgregar["Días Inasistencia injustificada"] = dias_df(ContratoPos,"Inasistencia injustificada",horasDia_)
+    # FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_negativoNetocero_df(ContratoPos,"Inasistencia injustificada",horasDia_)
     FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] = dias_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_) 
-    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_negativoNetocero_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH",horasDia_)
+    FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] = valor_df(ContratoPos,"Licencia No Remunerada (mayor a 2 Días) Aprobación RH")
     FilaAgregar["Días Suspensión (originada Sanción)"] = dias_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
-    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Suspensión (originada Sanción)",horasDia_)
+    FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] = valor_df(ContratoPos,"Suspensión (originada Sanción)")
     FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] = dias_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
-    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_negativoNetocero_df(ContratoPos,"Dominical por Suspensión (Inasistencia)",horasDia_)
+    FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] = valor_df(ContratoPos,"Dominical por Suspensión (Inasistencia)")
     FilaAgregar["Días Inasistencia injustificada"] = dias_df(ContratoPos,"Inasistencia injustificada",horasDia_)
-    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_negativoNetocero_df(ContratoPos,"Inasistencia injustificada",horasDia_)
+    FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"] = valor_df(ContratoPos,"Inasistencia injustificada")
     # TOTALIZAR GRUPO 3
     diasGrupo3_ = FilaAgregar["Días Licencia No Remunerada (mayor a 2 Días) Aprobación RH"] + FilaAgregar["Días Suspensión (originada Sanción)"] + FilaAgregar["Días Dominical por Suspensión (Inasistencia)"] + FilaAgregar["Días Inasistencia injustificada"]
     valorGrupo3_ = FilaAgregar["Valor Licencia No Remunerada (mayor a 2 Días) Aprobación RH (valor negativo)"] + FilaAgregar["Valor Días Suspensión (originada Sanción) valor negativo"] + FilaAgregar["Valor Dominical por Suspensión (Inasistencia) - valor negativo"] + FilaAgregar["Valor Inasistencia injustificada (este valor debe ser negativo)"]

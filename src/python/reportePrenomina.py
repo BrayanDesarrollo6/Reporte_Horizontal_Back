@@ -126,6 +126,7 @@ def insertarDocumento():
     Token_ = AccesToken()
     # Realizar consulta
     NombreDocumento = "./database/Prenomina_" + Empresa_
+    
     with open(NombreDocumento +'.xlsx','rb') as archivo:
         Datos_ = {'file': archivo}
         url_ = "https://creator.zoho.com/api/v2/hq5colombia/compensacionhq5/report/Generar_pre_nomina_Report/"+str(IDregistro_)+"/Adjunto1/upload"

@@ -426,8 +426,8 @@ def procesar(prenomina_zoho):
     add_info_customer(ws,prenomina_zoho)
 
     # Puede generar error
-    wb.save("./src/"+NombreDocumento+".xlsx")
-    funcionesGenerales().updatedata("./src/"+NombreDocumento+".xlsx",IDregistro_)
+    wb.save("./"+NombreDocumento+".xlsx")
+    funcionesGenerales().updatedata("./"+NombreDocumento+".xlsx",IDregistro_)
   
 def procesar_prenomina(data):
     # -----------------------------

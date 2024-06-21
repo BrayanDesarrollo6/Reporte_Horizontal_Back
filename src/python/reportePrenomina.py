@@ -85,7 +85,7 @@ def procesar(Horizontal):
     ws.insert_rows(1)
     ws.insert_rows(1)
     ws.insert_rows(1)
-    writer = pd.ExcelWriter("./src/database/"+NombreDocumento+".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter("./database/"+NombreDocumento+".xlsx", engine='xlsxwriter')
     Horizontal.to_excel(writer, sheet_name='Sheet1',index = False, header = False , startrow = 4)
     workbook = writer.book
     worksheet = writer.sheets["Sheet1"]
@@ -125,7 +125,7 @@ def insertarDocumento():
     # Token_ = AccesToken()
     Token_ = AccesToken()
     # Realizar consulta
-    NombreDocumento = "./src/database/Prenomina_" + Empresa_
+    NombreDocumento = "./database/Prenomina_" + Empresa_
     with open(NombreDocumento +'.xlsx','rb') as archivo:
         Datos_ = {'file': archivo}
         url_ = "https://creator.zoho.com/api/v2/hq5colombia/compensacionhq5/report/Generar_pre_nomina_Report/"+str(IDregistro_)+"/Adjunto1/upload"

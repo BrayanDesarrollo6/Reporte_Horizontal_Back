@@ -381,7 +381,7 @@ def generar_row(df_horizontal,df_prenomina):
     else:
         FilaAgregar["FECHA INGRESO"] = ""
     fecha_final = df_horizontal.iloc[0]['Fecha Retiro SS']
-    if str(fecha_final) != "NaT":
+    if str(fecha_final) != "NaT" and str(fecha_final) != "":
         fechafin = fecha_final.date()
         FilaAgregar["FECHA FINAL"] = fechafin
     else:

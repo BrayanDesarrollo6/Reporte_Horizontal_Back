@@ -344,6 +344,7 @@ def generar_dataframe_horizontal(ContratoPos, Horizontal):
     # TOTAL NOMINA 
     otrosDevengos_ = FilaAgregar["Indemnización, Bono por Retiro o Suma transaccional"] + FilaAgregar["Auxilio desplazamiento (parametrizado en el sistema por días laborados depende lugar trabajo y lugar residencia)"] + FilaAgregar["Gastos de transporte fijo (monto mensual asignado para desempeño de sus funciones ej. Comerciales, mantenimiento, gerentes, area seguridad etc)"] + FilaAgregar["Gastos de transporte ocasional (reportado por la operación quincenalmente)"] + FilaAgregar["Bonificacion no constitutiva de salario  BNCS"] + FilaAgregar["Bonificacion salarial"]
     totalesSalarioEXRN_ = FilaAgregar["Valor Salario"] + FilaAgregar["Reajuste salario"] + FilaAgregar["Aux.transporte"] + FilaAgregar["Reajuste aux. transporte"] + FilaAgregar["Auxilio conectividad"] + FilaAgregar["Total valor HE + Recargos"] 
+    totalNomina_ = totalesSalarioEXRN_  + FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] + FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] + otrosDevengos_
     totalNomina_ = totalesSalarioEXRN_ + FilaAgregar["Valor incapacidad enfermedad general (Días 1 y 2)"] + FilaAgregar["Grupo # 1 Valor total ausencias justificadas con reconocimiento"] + FilaAgregar["Grupo # 3 Valor total ausencias injustificadas, sanciones, dominical"] + otrosDevengos_
     FilaAgregar["Total conceptos nómina"] = totalNomina_
     FilaAgregar["% Porcentaje Arl"] = str(ContratoPos.iloc[0]['Riesgo ARL']) + "%"

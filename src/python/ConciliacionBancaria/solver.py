@@ -27,7 +27,7 @@ def ejecutar_algoritmo(toolbox, n_generaciones=40, poblacion=300):
     best_individual = tools.selBest(population, 1)[0]
     return best_individual
 
-def obtener_mejor_combinacion(numeros, objetivo, n_iteraciones=100, valor_minimo = 10):
+def obtener_mejor_combinacion(numeros, objetivo, n_iteraciones=1000, valor_minimo = 10):
     mejor_combinacion = None
     mejor_diferencia = float('inf')
 
@@ -41,7 +41,7 @@ def obtener_mejor_combinacion(numeros, objetivo, n_iteraciones=100, valor_minimo
             mejor_diferencia = diferencia
             mejor_combinacion = [numeros[i] for i in range(len(numeros)) if best_individual[i] == 1]
 
-        if mejor_diferencia == 0 or mejor_diferencia <= valor_minimo:
+        if mejor_diferencia == 0:
             break
 
     return mejor_combinacion, mejor_diferencia

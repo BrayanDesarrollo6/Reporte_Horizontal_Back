@@ -33,11 +33,11 @@ def download_file_zoho_creator(app, report, record_id, field, name, token):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        content_type = response.headers.get('Content-Type')
+        content_type = response.headers.get('content-type')
         ext = get_file_type(content_type)
 
         if ext is None:
-            print(f'Error tipo de archivo no reconocido: {content_type}')
+            print(f'Error tipo de archivo no reconocido: {response.headers}')
             return None
 
         file_name = f'{name}.{ext}'

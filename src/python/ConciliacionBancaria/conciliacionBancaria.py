@@ -17,10 +17,11 @@ def main():
     report = req_data["report"]
     record_id = req_data["recordId"]
     field_name = req_data["fieldName"]
+    file_name = req_data["fileName"]
     value_min = req_data["valueMin"]
     
     token = obtener_access_token()
-    file_path = download_zoho_file(app, report, record_id, field_name, 'conciliacionBancaria', token)
+    file_path = download_zoho_file(app, report, record_id, field_name, file_name, token)
     values, objective = procesar_excel(file_path)
     
     if values is not None and objective is not None:

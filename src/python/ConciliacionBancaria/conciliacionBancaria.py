@@ -19,13 +19,14 @@ def main():
     field_name = req_data["fieldName"]
     file_name = req_data["fileName"]
     value_min = req_data["valueMin"]
+    iterations = req_data["iterations"]
     
     token = obtener_access_token()
     file_path = download_zoho_file(app, report, record_id, field_name, file_name, token)
     values, objective = procesar_excel(file_path)
     
     if values is not None and objective is not None:
-        resultado, diferencia = obtener_mejor_combinacion(values, objective, 100, value_min)
+        resultado, diferencia = obtener_mejor_combinacion(values, objective, iterations, value_min)
         guardar_resultados(file_path, resultado, diferencia, values, objective)
         access_token = obtener_access_token()
         file_path = upload_zoho_file(app, report, record_id, field_name, access_token, file_path)

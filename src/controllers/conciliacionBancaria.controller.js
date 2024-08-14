@@ -6,8 +6,8 @@ const conciliacionBancariaController = {};
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 conciliacionBancariaController.calcular = (req, res) => {
-    const { app, report, recordId, fieldName, fileName, valueMin } = req.body;
-    if (!app || !report || !recordId || !fieldName || !fileName || !valueMin) {
+    const { app, report, recordId, fieldName, fileName, valueMin, iterations } = req.body;
+    if (!app || !report || !recordId || !fieldName || !fileName || !valueMin || !iterations) {
         res.status(400).json({ message: 'Las keys app, report, recordId, fieldName, valueMin en el cuerpo de la solicitud son obligatorias'});
         console.log('El cuerpo de la solicitud esta incompleto');
         return;

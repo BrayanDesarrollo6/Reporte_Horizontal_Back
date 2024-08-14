@@ -13,7 +13,10 @@ conciliacionBancariaController.calcular = (req, res) => {
 
     const jsonString = JSON.stringify(req.body);
     const __dirname = dirname(require.main.filename);
-    const process = spawn('python',[join(__dirname,'/python/conciliacionBancaria/conciliacionBancaria.py'), jsonString]);
+
+    res.status(200).json({ message: 'Solicitud recibida correctamente' });
+
+    const process = spawn('python',[join(__dirname,'/python/ConciliacionBancaria/conciliacionBancaria.py'), jsonString]);
 
     process.stderr.on("data", (data) => {
         console.error('stderr:',data.toString());
@@ -25,12 +28,14 @@ conciliacionBancariaController.calcular = (req, res) => {
         file_path = file_path.split("\n").join("");
         
         if (file_path.includes("Error")) {
-            res.status(400).json({ message: file_path });
+            // res.status(400).json({ message: file_path });
+            console.log(file_path);
         
         } else {
             process.stdout.on('end', function(data) {
                 fs.unlinkSync(file_path);
-                res.status(200).json({ message: 'Solicitud recibida correctamente' });
+                console.log(file_path);
+                // res.status(200).json({ message: 'Solicitud recibida correctamente' });
             })
         }
     });

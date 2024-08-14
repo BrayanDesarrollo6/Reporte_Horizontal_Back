@@ -25,7 +25,6 @@ def download_file_zoho_creator(app, report, record_id, field, name, token):
     url = f"https://creator.zoho.com/api/v2.1/hq5colombia/{app}/report/{report}/{record_id}/{field}/download"
     
     headers = {
-        'Content-Type': 'application/json',
         'Authorization': f'Zoho-oauthtoken {token}'
     }
 
@@ -33,7 +32,7 @@ def download_file_zoho_creator(app, report, record_id, field, name, token):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        content_type = response.headers.get('content-type')
+        content_type = response.headers.get('Content-Type')
         ext = get_file_type(content_type)
 
         if ext is None:

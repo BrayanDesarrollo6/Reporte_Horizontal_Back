@@ -15,6 +15,7 @@ dash==2.11.1
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
+deap==1.4.1
 decorator==5.1.1
 distlib==0.3.6
 Django==4.1.4
@@ -42,11 +43,11 @@ mysql-connector-python==8.3.0
 nest-asyncio==1.5.6
 numpy==1.23.5
 opencv-python==4.9.0.80
-openpyxl==3.0.10
+openpyxl==3.1.5
 outcome==1.2.0
 packaging==23.0
 panda==0.3.1
-pandas==1.5.2
+pandas==2.2.2
 pdfkit==1.0.0
 pefile==2023.2.7
 Pillow==9.4.0

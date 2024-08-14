@@ -3,7 +3,6 @@ const express = require('express');
 const morgan = require('morgan');
 const app = express();
 const cors = require('cors');
-const XLSX = require('xlsx');
 const fs = require('fs');
 // const bodyParser = require('body-parser');
 

@@ -5,6 +5,8 @@ const requestController = require('../controllers/requests.controller.js')
 const especialesController = require('../controllers/reporteEspecial.controller.js')
 const prenominaController = require('../controllers/prenomina.controller.js')
 const facturacionController = require('../controllers/facturacionExamenes.controller.js')
+const conciliacionBancaria = require('../controllers/conciliacionBancaria.controller.js')
+
 // Ruta 1 - Reporte Horizontal
 router.post('/procesar', requestController.ReporteHorizontalResponse)
 router.get('/procesar', requestController.ReporteHorizontalResponseDocument)
@@ -43,7 +45,11 @@ router.get('/api/v1/reporteNominaDHL2', especialesController.reporteNominaRespon
 //RUTA 8 - PRENOMINA COMPENSACION
 router.post('/api/v1/prenomina', prenominaController.generarPrenomina)
 
+// RUTA 9 - FACTURACION EXAMENES MEDICOS
 router.post('/api/v1/formatoFacturacionExamenes', facturacionController.generarFormato)
+
+// RUTA 10
+router.post('/api/v1/conciliacionBancaria', conciliacionBancaria.calcular)
 
 // router.post('/api/v1/reporteEmpleadoDHL', requestController.formatoFacturacionExamenes)
 module.exports = router;

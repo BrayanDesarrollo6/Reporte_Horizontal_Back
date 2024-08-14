@@ -3,6 +3,8 @@ const spawn = require("child_process").spawn;
 const fs = require('fs');
 const conciliacionBancariaController = {};
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 conciliacionBancariaController.calcular = (req, res) => {
     const { app, report, recordId, fieldName, valueMin } = req.body;
     if (!app || !report || !recordId || !fieldName || !valueMin) {
@@ -15,6 +17,8 @@ conciliacionBancariaController.calcular = (req, res) => {
     const __dirname = dirname(require.main.filename);
 
     res.status(200).json({ message: 'Solicitud recibida correctamente' });
+
+    delay(10);
 
     const process = spawn('python',[join(__dirname,'/python/ConciliacionBancaria/conciliacionBancaria.py'), jsonString]);
 

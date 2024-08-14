@@ -33,7 +33,7 @@ def obtener_mejor_combinacion(numeros, objetivo, n_iteraciones=1000, valor_minim
 
     toolbox = configurar_toolbox(numeros, objetivo)
 
-    for _ in range(n_iteraciones):
+    while True:
         best_individual = ejecutar_algoritmo(toolbox)
         diferencia = objetivo - sum(n for n, i in zip(numeros, best_individual) if i == 1)
         

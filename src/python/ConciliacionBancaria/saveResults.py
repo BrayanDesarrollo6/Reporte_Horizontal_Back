@@ -30,7 +30,6 @@ def guardar_resultados(ruta_archivo_excel, resultado, diferencia, valores, objet
     
     # Crear la columna 'Resultados'
     resultados_columna = []
-    resultado_set = set(resultado)  # Convertir a set para búsqueda rápida
     
     for valor in columna_a:
         if valor in resultado:

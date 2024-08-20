@@ -21,7 +21,7 @@ def configurar_toolbox(numeros, objetivo):
     toolbox.register("select", tools.selTournament, tournsize=3)
     return toolbox
 
-def ejecutar_algoritmo(toolbox, n_generaciones=40, poblacion=300):
+def ejecutar_algoritmo(toolbox, n_generaciones=100, poblacion=500):
     population = toolbox.population(n=poblacion)
     algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=n_generaciones, verbose=False)
     best_individual = tools.selBest(population, 1)[0]
@@ -35,9 +35,10 @@ def obtener_mejor_combinacion(numeros, objetivo, n_iteraciones=100, valor_minimo
 
     for _ in range(n_iteraciones):
         best_individual = ejecutar_algoritmo(toolbox)
-        diferencia = objetivo - sum(n for n, i in zip(numeros, best_individual) if i == 1)
+        suma = sum(n for n, i in zip(numeros, best_individual) if i == 1)
+        diferencia = abs(objetivo - suma)
         
-        if diferencia >= 0 and diferencia < mejor_diferencia:
+        if diferencia < mejor_diferencia:
             mejor_diferencia = diferencia
             mejor_combinacion = [numeros[i] for i in range(len(numeros)) if best_individual[i] == 1]
 

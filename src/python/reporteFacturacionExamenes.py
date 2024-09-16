@@ -28,17 +28,9 @@ def get_df(data):
     df = pd.read_excel(url, parse_dates=['FECHA'])
     return df
 
-def clean_column(list):
-  return '\n'.join(list)
-
-def convert_to_list(string, delimiter):
-    return string.split(delimiter)
-
 def tranform_df(df):
     default_columns = df.shape[1]-2
     df['FECHA'] = df['FECHA'].dt.strftime('%d-%m-%Y')
-    df['EXAMEN MEDICO'] = df['EXAMEN MEDICO'].apply(lambda x: convert_to_list(x, ','))
-    df['EXAMEN MEDICO'] = df['EXAMEN MEDICO'].apply(clean_column)
     nuevo_df = df.pivot_table(index='ID PROGRAMACION', columns='Examen medico', values='Valor', fill_value=0, aggfunc='first')
     nuevo_df = pd.merge(df.drop(columns=['Examen medico', 'Valor']).drop_duplicates(),nuevo_df, on='ID PROGRAMACION')
 

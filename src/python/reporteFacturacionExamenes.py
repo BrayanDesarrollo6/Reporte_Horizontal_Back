@@ -31,6 +31,7 @@ def get_df(data):
 def tranform_df(df):
     default_columns = df.shape[1]-2
     df['FECHA'] = df['FECHA'].dt.strftime('%d-%m-%Y')
+    df['EXAMEN MEDICO'] = df['EXAMEN MEDICO'].apply(lambda x: x.replace('[', '').replace(']', '').replace('"', '') if isinstance(x, str) else '')
     nuevo_df = df.pivot_table(index='ID PROGRAMACION', columns='Examen medico', values='Valor', fill_value=0, aggfunc='first')
     nuevo_df = pd.merge(df.drop(columns=['Examen medico', 'Valor']).drop_duplicates(),nuevo_df, on='ID PROGRAMACION')
 
